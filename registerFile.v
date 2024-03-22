@@ -3,9 +3,16 @@ module registerFile
 #(
     parameter NB_ADD_MEM = 14
 )(
-    input  clk,
-    input  i_rst,
+    output [31:0] o_gpi,
+    output        o_rst,
+    output        o_enbTx,
+    output        o_enbRx,
+    output  [1:0] o_phase_sel,
 
+    output        o_run_log,
+    output        o_read_log,
+    output [14:0] o_addr_log_to_mem,
+    
     input  [31:0] i_gpo,
     input  [31:0] i_data_log_from_mem,
     input         i_mem_full,
@@ -13,26 +20,19 @@ module registerFile
     input  [63:0] i_ber_samp_I ,
     input  [63:0] i_ber_samp_Q ,
     input  [63:0] i_ber_error_I,
-    input  [63:0] i_ber_error_Q,
+    input  [63:0] i_ber_error_Q,    
 
-    output [31:0] o_gpi,
-    output        o_rst,
-    output        o_enbTx,
-    output        o_enbRx,
-    output [1:0] o_phase_sel,
-
-    output o_run_log,
-    output o_read_log,
-    output [14:0] o_addr_log_to_mem
+    input         i_rst,
+    input         clk
 );
 //  COMANDOS DEL UP
-    localparam [3:0] RESET    = 4'd0;   
-    localparam [3:0] EN_TX    = 4'd1;   
-    localparam [3:0] EN_RX    = 4'd2;   
-    localparam [3:0] PH_SEL   = 4'd3;
-    localparam [3:0] RUN_MEM  = 4'd4;
-    localparam [3:0] READ_MEM = 4'd5;
-    localparam [3:0] ADDR_MEM = 4'd6;
+    localparam RESET    = 4'd0;   
+    localparam EN_TX    = 4'd1;   
+    localparam EN_RX    = 4'd2;   
+    localparam PH_SEL   = 4'd3;
+    localparam RUN_MEM  = 4'd4;
+    localparam READ_MEM = 4'd5;
+    localparam ADDR_MEM = 4'd6;
 
     reg           [31:0] gpi;
     reg                  rst;
@@ -52,10 +52,18 @@ module registerFile
     wire                 gpo_enable;
     wire          [22:0] gpo_data;
 
-    assign gpo_command = gpo[31:24];
-    assign gpo_enable  = gpo[23];
-    assign gpo_data    = gpo[22:0];
+    assign gpo_command = i_gpo[31:24];
+    assign gpo_enable  = i_gpo[23];
+    assign gpo_data    = i_gpo[22:0];
 
+    assign o_gpi              = gpi;
+    assign o_rst              = rst;
+    assign o_enbTx            = enbTx;
+    assign o_enbRx            = enbRx;
+    assign o_phase_sel        = phase_sel;
+    assign o_run_log          = run_log;
+    assign o_read_log         = read_log;
+    assign o_addr_log_to_mem  = addr_log_to_mem;
 
     always @(posedge clk) begin
         if(i_rst) begin
@@ -81,20 +89,39 @@ module registerFile
                     READ_MEM:   begin
                         if( !i_mem_full ) begin
                             read_log        <= 1'b1;
-                            run_log         <= 1'b0;
+                            // run_log         <= 1'b0;
                             addr_log_to_mem <= gpo_data[13:0];
                         end 
                     end
 
-                    BER_I: begin
-                        BER_buffer <= {i_ber_samp_I,i_ber_error_I};
-                        BER_flag   <= 1'b1;
-                    end
-                    BER_Q: begin
-                        BER_buffer <= {i_ber_samp_Q,i_ber_error_Q};
-                        BER_flag   <= 1'b1;
-                    end
+                    BER_S_I :
+                        begin
+                        gpi <= i_ber_samp_I[31:0];
+                        ber_buffer <= i_ber_samp_I;
+                        end
 
+                    BER_S_Q :
+                        begin
+                        gpi <= i_ber_samp_Q[31:0];
+                        ber_buffer <= i_ber_samp_Q;
+                        end
+
+                    BER_E_I :
+                        begin
+                        gpi <= i_ber_error_I[31:0];
+                        ber_buffer <= i_ber_error_I;
+                        end
+
+                    BER_E_Q :
+                        begin
+                        gpi <= i_ber_error_Q[31:0];
+                        ber_buffer <= i_ber_error_Q;
+                        end
+                        
+                    BER_HIGH :
+                        begin
+                        gpi <= ber_buffer[63:32];  
+                        end
 
                     IS_MEM_FULL:  gpi <= i_mem_full;
 
@@ -103,37 +130,14 @@ module registerFile
             end
             else if(read_log)
                 gpi <= i_data_log_from_mem;
-            else if( BER_flag != 4'b0 ) begin
-                gpi <= BER_buffer[31:0] <;
+            else if(run_log) begin
+                run_log <= 0;
             end
             
             prev_enable <= gpo_enable;
         end
     end
 
-    always @(posedge clk) begin
-        if (i_rst) begin
-            BER_cnt <= 2'b00;
-        end
-        else if ( BER_flag == 1'b1 ) begin
-            if (BER_cnt == 2'b00) begin
-                gpi <= BER_buffer[31:0];
-                BER_cnt <= BER_cnt + 1;
-            end
-            else if (BER_cnt == 2'b01) begin
-                gpi <= BER_buffer[63:32];
-                BER_cnt <= BER_cnt + 1;
-            end
-            else if (BER_cnt == 2'b10) begin
-                gpi <= BER_buffer[95:64];
-                BER_cnt <= BER_cnt + 1;
-            end
-            else begin
-                gpi <= BER_buffer[127:96];
-                BER_cnt <= 2'b00;
-            end
-        end
-    end
 
 
 endmodule
