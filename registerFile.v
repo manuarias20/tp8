@@ -8,7 +8,7 @@ module registerFile
 
     input  [31:0] i_gpo,
     input  [31:0] i_data_log_from_mem,
-    input  i_mem_full,
+    input         i_mem_full,
 
     input  [63:0] i_ber_samp_I ,
     input  [63:0] i_ber_samp_Q ,
@@ -16,9 +16,9 @@ module registerFile
     input  [63:0] i_ber_error_Q,
 
     output [31:0] o_gpi,
-    output o_rst,
-    output o_enbTx,
-    output o_enbRx,
+    output        o_rst,
+    output        o_enbTx,
+    output        o_enbRx,
     output [1:0] o_phase_sel,
 
     output o_run_log,
@@ -26,30 +26,31 @@ module registerFile
     output [14:0] o_addr_log_to_mem
 );
 //  COMANDOS DEL UP
-    localparam [3:0] RESET = 4'd0;   
-    localparam [3:0] EN_TX = 4'd1;   
-    localparam [3:0] EN_RX = 4'd2;   
-    localparam [3:0] PH_SEL = 4'd3;
-    localparam [3:0] RUN_MEM = 4'd4;
+    localparam [3:0] RESET    = 4'd0;   
+    localparam [3:0] EN_TX    = 4'd1;   
+    localparam [3:0] EN_RX    = 4'd2;   
+    localparam [3:0] PH_SEL   = 4'd3;
+    localparam [3:0] RUN_MEM  = 4'd4;
     localparam [3:0] READ_MEM = 4'd5;
     localparam [3:0] ADDR_MEM = 4'd6;
 
-    reg [31:0] gpi;
-    reg rst;
-    reg enbTx;
-    reg enbRx;
-    reg [1:0] phase_sel;
-    reg run_log;
-    reg read_log;
+    reg           [31:0] gpi;
+    reg                  rst;
+    reg                  enbTx;
+    reg                  enbRx;
+    reg            [1:0] phase_sel;
+    reg                  run_log;
+    reg                  read_log;
     reg [NB_ADD_MEM-1:0] addr_log_to_mem;
 
-    reg prev_enable;
-    reg [3:0]  BER_flag;
-    reg [63:0] BER_buffer;
+    reg                  prev_enable;
+    reg                  BER_flag;
+    reg            [1:0] BER_cnt;
+    reg          [127:0] BER_buffer;
 
-    wire gpo_command;
-    wire gpo_enable;
-    wire gpo_data;
+    wire           [7:0] gpo_command;
+    wire                 gpo_enable;
+    wire          [22:0] gpo_data;
 
     assign gpo_command = gpo[31:24];
     assign gpo_enable  = gpo[23];
@@ -84,22 +85,17 @@ module registerFile
                             addr_log_to_mem <= gpo_data[13:0];
                         end 
                     end
-                    BER_S_I:    begin
-                        BER_flag <= 4'b0001;
-                        BER_buffer <= i_ber_samp_I;
+
+                    BER_I: begin
+                        BER_buffer <= {i_ber_samp_I,i_ber_error_I};
+                        BER_flag   <= 1'b1;
                     end
-                    BER_S_Q:    begin
-                        BER_flag <= 4'b0010;
-                        BER_buffer <= i_ber_samp_Q;
+                    BER_Q: begin
+                        BER_buffer <= {i_ber_samp_Q,i_ber_error_Q};
+                        BER_flag   <= 1'b1;
                     end
-                    BER_E_I:    begin
-                        BER_flag <= 4'b0100;
-                        BER_buffer <= i_ber_error_I;
-                    end
-                    BER_E_Q:    begin
-                        BER_flag <= 4'b1000;
-                        BER_buffer <= i_ber_error_Q;
-                    end
+
+
                     IS_MEM_FULL:  gpi <= i_mem_full;
 
                     // default:
@@ -108,16 +104,36 @@ module registerFile
             else if(read_log)
                 gpi <= i_data_log_from_mem;
             else if( BER_flag != 4'b0 ) begin
-                case(BER_buffer)
-                    4'b0001:    gpi <= BER_buffer[]
-                endcase
+                gpi <= BER_buffer[31:0] <;
             end
             
             prev_enable <= gpo_enable;
         end
     end
 
-
+    always @(posedge clk) begin
+        if (i_rst) begin
+            BER_cnt <= 2'b00;
+        end
+        else if ( BER_flag == 1'b1 ) begin
+            if (BER_cnt == 2'b00) begin
+                gpi <= BER_buffer[31:0];
+                BER_cnt <= BER_cnt + 1;
+            end
+            else if (BER_cnt == 2'b01) begin
+                gpi <= BER_buffer[63:32];
+                BER_cnt <= BER_cnt + 1;
+            end
+            else if (BER_cnt == 2'b10) begin
+                gpi <= BER_buffer[95:64];
+                BER_cnt <= BER_cnt + 1;
+            end
+            else begin
+                gpi <= BER_buffer[127:96];
+                BER_cnt <= 2'b00;
+            end
+        end
+    end
 
 
 endmodule
