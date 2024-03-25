@@ -96,11 +96,12 @@ module top #(
    ///////////////////////////////////////////
    // Register File
    ///////////////////////////////////////////
-   register_file
-    u_register_file 
+   registerFile
+    u_registerFile 
       (.o_gpio(gpi0)              ,
        .o_rst()                   ,
-       .o_enb(Enb)                , //! o_enb[0] -> EnbTx. o_enb[1] -> EnbRx 
+       .o_enbTx(EnbTx)            ,
+       .o_enbRx(EnbRx)            ,
        .o_phase_sel(phase_sel)    ,
        .o_run_log(run_log)        ,
        .o_read_log(read_log)      ,
