@@ -26,21 +26,21 @@ module registerFile
     input         clk
 );
 //  COMANDOS DEL UP
-    localparam RESET    = 4'd0;   
-    localparam EN_TX    = 4'd1;   
-    localparam EN_RX    = 4'd2;   
-    localparam PH_SEL   = 4'd3;
-    localparam RUN_MEM  = 4'd4;
-    localparam READ_MEM = 4'd5;
-    localparam ADDR_MEM = 4'd6;
+    localparam RESET    = 4'd0;     // Resetear el sistema
+    localparam EN_TX    = 4'd1;     // Habilitar el Tx
+    localparam EN_RX    = 4'd2;     // Habilitar el Rx
+    localparam PH_SEL   = 4'd3;     // Selección de fase del filtro
+    localparam RUN_MEM  = 4'd4;     // Comenzar el logueo de datos en memoria
+    localparam READ_MEM = 4'd5;     // Habilitar la lectura de memoria
+    localparam ADDR_MEM = 4'd6;     // Leer memoria en la direccion indicada
 
     reg           [31:0] gpi;
     reg                  rst;
     reg                  enbTx;
     reg                  enbRx;
     reg            [1:0] phase_sel;
-    reg                  run_log;
-    reg                  read_log;
+    reg                  run_log;       // Inicia la captura de datos en memoria con un flanco positivo
+    reg                  read_log;      // Habilita la lectura de memoria cuando está en alto
     reg [NB_ADD_MEM-1:0] addr_log_to_mem;
 
     reg                  prev_enable;
