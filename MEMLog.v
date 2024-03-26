@@ -103,7 +103,7 @@ assign addr_mem_bram = addr_mem;
 
     /////////////////////////////////////////////////////////////
 
-    // Output & internal signals
+    // Internal signals
     always @(*) begin
     case(state)
         IDLE:
