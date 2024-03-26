@@ -26,9 +26,9 @@ module MEMLog
     reg                        mem_full;
     reg  [BRAM_DATA_WIDTH-1:0] data_log_from_mem;
     wire [BRAM_DATA_WIDTH-1:0] bram_data_out;
-    reg                        bram_rw;   // 0 -> Write, 1 -> Read
-    wire                       bram_cs;
-    reg  [BRAM_ADDR_WIDTH-1:0] addr_mem;
+    reg                        bram_rw;     // 0 -> Write, 1 -> Read
+    reg                        bram_cs;     // 0 -> selecciona bram a. 1-> selecciona bram b.
+    reg  [BRAM_ADDR_WIDTH-1:0] addr_mem;    // selecciona de donde viene el direccionamiento de la bram
     wire [BRAM_ADDR_WIDTH-1:0] addr_mem_bram;
 
 bram
@@ -36,7 +36,23 @@ bram
     .BRAM_ADDR_WIDTH(BRAM_ADDR_WIDTH),  // 32K x 16 bits
     .BRAM_DATA_WIDTH(BRAM_DATA_WIDTH)
 ) 
-u_bram
+u_bram_a
+(
+    .clk          (clk),
+    .addr         (addr_mem_bram),
+    .chipselect_n (~bram_cs),      
+    .write_n      (bram_rw),
+    .read_n       (~bram_rw),
+    .bram_data_in (i_filter_data),
+    .bram_data_out(bram_data_out)
+);
+
+bram
+#(
+    .BRAM_ADDR_WIDTH(BRAM_ADDR_WIDTH),  // 32K x 16 bits
+    .BRAM_DATA_WIDTH(BRAM_DATA_WIDTH)
+) 
+u_bram_b
 (
     .clk          (clk),
     .addr         (addr_mem_bram),
@@ -49,7 +65,6 @@ u_bram
 
 assign o_mem_full = mem_full;
 assign o_data_log_from_mem = data_log_from_mem;
-assign bram_cs = 1'b0;
 assign addr_mem_bram = addr_mem;
 
     /////////////////////////////////////////////////////////////
@@ -142,17 +157,26 @@ assign addr_mem_bram = addr_mem;
     always @(posedge clk) begin
         if(i_rst) begin
             addr_count <= {BRAM_ADDR_WIDTH{1'b0}};
+            bram_cs    <= 1'b0;
         end else begin
             if (state == RUN) begin
-                if (addr_count == {BRAM_ADDR_WIDTH{1'b1}}) begin
-                    addr_count <= {BRAM_ADDR_WIDTH{1'b0}};
+                bram_cs <= ~(bram_cs);
+                if (!bram_cs) begin
+                    addr_count <= addr_count;
                 end
-                else begin
-                    addr_count <= addr_count + 1;
+                else
+                begin
+                    if (addr_count == {BRAM_ADDR_WIDTH{1'b1}}) begin
+                        addr_count <= {BRAM_ADDR_WIDTH{1'b0}};                        
+                    end
+                    else begin
+                        addr_count <= addr_count + 1;
+                    end
                 end
             end
             else begin
                 addr_count <= {BRAM_ADDR_WIDTH{1'b0}};
+                bram_cs    <= 1'b0;
             end
         end
     end
