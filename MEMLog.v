@@ -66,7 +66,7 @@ u_bram_b
 
 assign o_mem_full = mem_full;
 assign addr_mem_bram = addr_mem;
-assign o_data_log_from_mem = {bram_data_out_a, bram_data_out_b};
+assign o_data_log_from_mem = {bram_data_out_b, bram_data_out_a};
 
     /////////////////////////////////////////////////////////////
     // State Machine
@@ -180,7 +180,8 @@ assign o_data_log_from_mem = {bram_data_out_a, bram_data_out_b};
             end
             else begin
                 addr_count <= {BRAM_ADDR_WIDTH{1'b0}};
-                bram_cs    <= 1'b0;
+                bram_cs_a <= 1'b0;
+                bram_cs_b <= 1'b1;
             end
         end
     end
