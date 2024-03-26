@@ -158,18 +158,22 @@ assign o_data_log_from_mem = {bram_data_out_b, bram_data_out_a};
             bram_cs_b    <= 1'b1;
         end else begin
             if (state == RUN) begin
-                bram_cs_a <= ~(bram_cs_a);
-                bram_cs_b <= ~(bram_cs_b);
                 if (!bram_cs_a) begin
                     addr_count <= addr_count;
+                    bram_cs_a <= ~(bram_cs_a);
+                    bram_cs_b <= ~(bram_cs_b);
                 end
                 else
                 begin
                     if (addr_count == {BRAM_ADDR_WIDTH{1'b1}}) begin
-                        addr_count <= {BRAM_ADDR_WIDTH{1'b0}};                        
+                        addr_count <= {BRAM_ADDR_WIDTH{1'b0}}; 
+                        bram_cs_a <= 1'b0;
+                        bram_cs_b <= 1'b0;                       
                     end
                     else begin
                         addr_count <= addr_count + 1;
+                        bram_cs_a <= ~(bram_cs_a);
+                        bram_cs_b <= ~(bram_cs_b);
                     end
                 end
             end
