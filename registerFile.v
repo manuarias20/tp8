@@ -1,29 +1,29 @@
 
 module registerFile
 #(
-    parameter NB_ADD_MEM = 14
+    parameter NB_ADDR_MEM = 15
 )(
-    output [31:0] o_gpi,
-    output        o_rst,
-    output        o_enbTx,
-    output        o_enbRx,
-    output  [1:0] o_phase_sel,
+    output            [31:0] o_gpi,
+    output                   o_rst,
+    output                   o_enbTx,
+    output                   o_enbRx,
+    output             [1:0] o_phase_sel,
 
-    output        o_run_log,
-    output        o_read_log,
-    output [14:0] o_addr_log_to_mem,
+    output                   o_run_log,
+    output                   o_read_log,
+    output [NB_ADDR_MEM-1:0] o_addr_log_to_mem,
     
-    input  [31:0] i_gpo,
-    input  [31:0] i_data_log_from_mem,
-    input         i_mem_full,
+    input             [31:0] i_gpo,
+    input             [31:0] i_data_log_from_mem,
+    input                    i_mem_full,
 
-    input  [63:0] i_ber_samp_I ,
-    input  [63:0] i_ber_samp_Q ,
-    input  [63:0] i_ber_error_I,
-    input  [63:0] i_ber_error_Q,    
+    input             [63:0] i_ber_samp_I,
+    input             [63:0] i_ber_samp_Q,
+    input             [63:0] i_ber_error_I,
+    input             [63:0] i_ber_error_Q,    
 
-    input         i_rst,
-    input         clk
+    input                    i_rst,
+    input                    clk
 );
 //  COMANDOS DEL UP
     localparam RESET    = 4'd0;     // Resetear el sistema
@@ -34,23 +34,23 @@ module registerFile
     localparam READ_MEM = 4'd5;     // Habilitar la lectura de memoria
     localparam ADDR_MEM = 4'd6;     // Leer memoria en la direccion indicada
 
-    reg           [31:0] gpi;
-    reg                  rst;
-    reg                  enbTx;
-    reg                  enbRx;
-    reg            [1:0] phase_sel;
-    reg                  run_log;       // Inicia la captura de datos en memoria con un flanco positivo
-    reg                  read_log;      // Habilita la lectura de memoria cuando está en alto
-    reg [NB_ADD_MEM-1:0] addr_log_to_mem;
+    reg            [31:0] gpi;
+    reg                   rst;
+    reg                   enbTx;
+    reg                   enbRx;
+    reg             [1:0] phase_sel;
+    reg                   run_log;       // Inicia la captura de datos en memoria con un flanco positivo
+    reg                   read_log;      // Habilita la lectura de memoria cuando está en alto
+    reg [NB_ADDR_MEM-1:0] addr_log_to_mem;
 
-    reg                  prev_enable;
-    reg                  BER_flag;
-    reg            [1:0] BER_cnt;
-    reg          [127:0] BER_buffer;
+    reg                   prev_enable;
+    reg                   BER_flag;
+    reg             [1:0] BER_cnt;
+    reg           [127:0] BER_buffer;
 
-    wire           [7:0] gpo_command;
-    wire                 gpo_enable;
-    wire          [22:0] gpo_data;
+    wire            [7:0] gpo_command;
+    wire                  gpo_enable;
+    wire           [22:0] gpo_data;
 
     assign gpo_command = i_gpo[31:24];
     assign gpo_enable  = i_gpo[23];
@@ -74,7 +74,7 @@ module registerFile
             phase_sel       <= 2'b0;
             run_log         <= 1'b0;
             read_log        <= 1'b0;
-            addr_log_to_mem <= {NB_ADD_MEM{1'b0}};
+            addr_log_to_mem <= {NB_ADDR_MEM{1'b0}};
             prev_enable     <= 1'b0;
             BER_flag        <= 4'b0;
         end else begin
