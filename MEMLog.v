@@ -28,7 +28,8 @@ module MEMLog
     wire bram_data_out;
     reg  bram_rw;   // 0 -> Write, 1 -> Read
     wire bram_cs;
-    wire addr_mem;
+    reg addr_mem;
+    wire addr_mem_bram;
 
 bram
 #(
@@ -38,7 +39,7 @@ bram
 u_bram
 (
     .clk          (clk),
-    .addr         (addr_mem),
+    .addr         (addr_mem_bram),
     .chipselect_n (bram_cs),
     .write_n      (bram_rw),
     .read_n       (~bram_rw),
@@ -49,6 +50,7 @@ u_bram
 assign o_mem_full = mem_full;
 assign o_data_log_from_mem = data_log_from_mem;
 assign bram_cs = 1'b0;
+assign addr_mem_bram = addr_mem;
 
     /////////////////////////////////////////////////////////////
     // State Machine
