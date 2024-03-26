@@ -4,16 +4,16 @@ module MEMLog
     parameter BRAM_DATA_WIDTH = 16
 )
 (
-    input                        clk,
-    input                        i_rst,
-   
-    input  [BRAM_DATA_WIDTH-1:0] i_filter_data,  // muestras de los canales I ([15:8]) y Q ([7:0])
-    input                        i_run_log,
-    input                        i_read_log,
-    input  [BRAM_ADDR_WIDTH-1:0] i_addr_log_to_mem,  // dir de memoria
-
-    output                       o_mem_full,
-    output [BRAM_DATA_WIDTH-1:0] o_data_log_from_mem
+    input                          clk,
+    input                          i_rst,
+     
+    input  [BRAM_DATA_WIDTH-1:0]   i_filter_data,  // muestras de los canales I ([15:8]) y Q ([7:0])
+    input                          i_run_log,
+    input                          i_read_log,
+    input  [BRAM_ADDR_WIDTH-1:0]   i_addr_log_to_mem,  // dir de memoria
+  
+    output                         o_mem_full,
+    output [2*BRAM_DATA_WIDTH-1:0] o_data_log_from_mem
 );
     localparam IDLE = 2'd0; 
     localparam RUN  = 2'd1;
@@ -25,7 +25,8 @@ module MEMLog
 
     reg                        mem_full;
     reg  [BRAM_DATA_WIDTH-1:0] data_log_from_mem;
-    wire [BRAM_DATA_WIDTH-1:0] bram_data_out;
+    wire [BRAM_DATA_WIDTH-1:0] bram_data_out_a;
+    wire [BRAM_DATA_WIDTH-1:0] bram_data_out_b;
     reg                        bram_rw;     // 0 -> Write, 1 -> Read
     reg                        bram_cs;     // 0 -> selecciona bram a. 1-> selecciona bram b.
     reg  [BRAM_ADDR_WIDTH-1:0] addr_mem;    // selecciona de donde viene el direccionamiento de la bram
@@ -46,7 +47,7 @@ u_bram_a
     .write_n      (bram_rw),
     .read_n       (~bram_rw),
     .bram_data_in (i_filter_data),
-    .bram_data_out(bram_data_out)
+    .bram_data_out(bram_data_out_a)
 );
 
 bram
@@ -62,14 +63,14 @@ u_bram_b
     .write_n      (bram_rw),
     .read_n       (~bram_rw),
     .bram_data_in (i_filter_data),
-    .bram_data_out(bram_data_out)
+    .bram_data_out(bram_data_out_b)
 );
 
 assign o_mem_full = mem_full;
-assign o_data_log_from_mem = data_log_from_mem;
 assign addr_mem_bram = addr_mem;
 assign bram_cs_a = bram_cs;
 assign bram_cs_b = ~bram_cs;
+assign o_data_log_from_mem = {bram_data_out_a, bram_data_out_b};
 
     /////////////////////////////////////////////////////////////
     // State Machine
@@ -129,28 +130,24 @@ assign bram_cs_b = ~bram_cs;
         begin
             addr_mem = 0;
             mem_full = 0;
-            data_log_from_mem = 32'b0;
             bram_rw  = 0;
         end 
         RUN: 
         begin
             addr_mem = addr_count;
             mem_full = 0;
-            data_log_from_mem = 32'b0;
             bram_rw  = 0;
         end 
         FULL: 
         begin
             addr_mem = addr_count;
             mem_full = 1;
-            data_log_from_mem = 32'b0;
             bram_rw  = 1;
         end 
         READ: 
         begin
             addr_mem = i_addr_log_to_mem;
             mem_full = 1;
-            data_log_from_mem = bram_data_out;
             bram_rw  = 1;
         end 
     endcase

@@ -87,7 +87,7 @@ u_MEMLog
 
     #10000;
     i_read_log = 1;
-    for (i = 0; i<(2*(2**BRAM_ADDR_WIDTH)); i=i+1) begin
+    for (i = 0; i<(2**BRAM_ADDR_WIDTH); i=i+1) begin
         i_addr_log_to_mem = i;
         #10;
         if (i==0) begin
