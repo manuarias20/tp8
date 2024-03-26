@@ -55,7 +55,7 @@ u_MEMLog
 );
 
   integer i;
-  reg [BRAM_DATA_WIDTH-1:0] mem_aux [(1<<BRAM_ADDR_WIDTH)-1:0];
+  reg [BRAM_DATA_WIDTH-1:0] mem_aux [(1<<(BRAM_ADDR_WIDTH+1))-1:0];
   // Stimulus
   initial begin
     tb_clk = 0;

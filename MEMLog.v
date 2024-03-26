@@ -30,6 +30,8 @@ module MEMLog
     reg                        bram_cs;     // 0 -> selecciona bram a. 1-> selecciona bram b.
     reg  [BRAM_ADDR_WIDTH-1:0] addr_mem;    // selecciona de donde viene el direccionamiento de la bram
     wire [BRAM_ADDR_WIDTH-1:0] addr_mem_bram;
+    wire                       bram_cs_a;
+    wire                       bram_cs_b;
 
 bram
 #(
@@ -40,7 +42,7 @@ u_bram_a
 (
     .clk          (clk),
     .addr         (addr_mem_bram),
-    .chipselect_n (~bram_cs),      
+    .chipselect_n (bram_cs_a),      
     .write_n      (bram_rw),
     .read_n       (~bram_rw),
     .bram_data_in (i_filter_data),
@@ -56,7 +58,7 @@ u_bram_b
 (
     .clk          (clk),
     .addr         (addr_mem_bram),
-    .chipselect_n (bram_cs),
+    .chipselect_n (bram_cs_b),
     .write_n      (bram_rw),
     .read_n       (~bram_rw),
     .bram_data_in (i_filter_data),
@@ -66,6 +68,8 @@ u_bram_b
 assign o_mem_full = mem_full;
 assign o_data_log_from_mem = data_log_from_mem;
 assign addr_mem_bram = addr_mem;
+assign bram_cs_a = bram_cs;
+assign bram_cs_b = ~bram_cs;
 
     /////////////////////////////////////////////////////////////
     // State Machine
