@@ -25,7 +25,7 @@ module tb_MEMLOG #(
 
   //! DUT outputs
   wire o_mem_full;
-  wire [31:0] o_data_log_from_mem;
+  wire [BRAM_DATA_WIDTH-1:0] o_data_log_from_mem;
 
   //! Internal signals
 
