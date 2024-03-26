@@ -25,7 +25,7 @@ module tb_MEMLOG #(
 
   //! DUT outputs
   wire o_mem_full;
-  wire [BRAM_DATA_WIDTH-1:0] o_data_log_from_mem;
+  wire [2*BRAM_DATA_WIDTH-1:0] o_data_log_from_mem;
 
   //! Internal signals
 
@@ -92,6 +92,7 @@ u_MEMLog
 
     #10000;
     i_read_log = 1;
+    #10;
     for (i = 0; i<(2**BRAM_ADDR_WIDTH); i=i+1) begin
         i_addr_log_to_mem = i;
         #10;
