@@ -55,7 +55,7 @@ u_MEMLog
 );
 
   integer i;
-  reg [BRAM_DATA_WIDTH-1:0] mem_aux [(1<<(BRAM_ADDR_WIDTH+1))-1:0];
+  reg [2*BRAM_DATA_WIDTH-1:0] mem_aux [(1<<(BRAM_ADDR_WIDTH))-1:0];
   // Stimulus
   initial begin
     tb_clk = 0;
@@ -68,7 +68,7 @@ u_MEMLog
     i_read_log = 0;
     i_addr_log_to_mem = 0;
 
-    for (i = 0; i<(2*(2**BRAM_ADDR_WIDTH)); i=i+1) begin
+    for (i = 0; i<(2**BRAM_ADDR_WIDTH); i=i+1) begin
         mem_aux [i] = $urandom;
     end
 
@@ -77,12 +77,17 @@ u_MEMLog
 
     #10000;
     i_run_log = 1;
-    for (i = 0; i<(2*(2**BRAM_ADDR_WIDTH)); i=i+1) begin
+    for (i = 0; i<(2**BRAM_ADDR_WIDTH); i=i+1) begin
         #10;
         if (i==0) begin
             i_run_log = 0;
         end
-        i_filter_data = mem_aux [i];
+        
+        i_filter_data = mem_aux[i][BRAM_DATA_WIDTH-1:0];
+        
+        #10;
+        
+        i_filter_data = mem_aux[i][2*BRAM_DATA_WIDTH-1:BRAM_DATA_WIDTH];
     end
 
     #10000;
