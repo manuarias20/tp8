@@ -24,15 +24,13 @@ module MEMLog
     reg [BRAM_ADDR_WIDTH - 1 : 0] addr_count;
 
     reg                        mem_full;
-    reg  [BRAM_DATA_WIDTH-1:0] data_log_from_mem;
     wire [BRAM_DATA_WIDTH-1:0] bram_data_out_a;
     wire [BRAM_DATA_WIDTH-1:0] bram_data_out_b;
     reg                        bram_rw;     // 0 -> Write, 1 -> Read
-    reg                        bram_cs;     // 0 -> selecciona bram a. 1-> selecciona bram b.
     reg  [BRAM_ADDR_WIDTH-1:0] addr_mem;    // selecciona de donde viene el direccionamiento de la bram
     wire [BRAM_ADDR_WIDTH-1:0] addr_mem_bram;
-    wire                       bram_cs_a;
-    wire                       bram_cs_b;
+    reg                        bram_cs_a;
+    reg                        bram_cs_b;
 
 bram
 #(
@@ -68,8 +66,6 @@ u_bram_b
 
 assign o_mem_full = mem_full;
 assign addr_mem_bram = addr_mem;
-assign bram_cs_a = bram_cs;
-assign bram_cs_b = ~bram_cs;
 assign o_data_log_from_mem = {bram_data_out_a, bram_data_out_b};
 
     /////////////////////////////////////////////////////////////
@@ -123,7 +119,7 @@ assign o_data_log_from_mem = {bram_data_out_a, bram_data_out_b};
 
     /////////////////////////////////////////////////////////////
 
-    // Internal signals
+    // Output signals
     always @(*) begin
     case(state)
         IDLE:
@@ -158,11 +154,13 @@ assign o_data_log_from_mem = {bram_data_out_a, bram_data_out_b};
     always @(posedge clk) begin
         if(i_rst) begin
             addr_count <= {BRAM_ADDR_WIDTH{1'b0}};
-            bram_cs    <= 1'b0;
+            bram_cs_a    <= 1'b0;
+            bram_cs_b    <= 1'b1;
         end else begin
             if (state == RUN) begin
-                bram_cs <= ~(bram_cs);
-                if (!bram_cs) begin
+                bram_cs_a <= ~(bram_cs_a);
+                bram_cs_b <= ~(bram_cs_b);
+                if (!bram_cs_a) begin
                     addr_count <= addr_count;
                 end
                 else
@@ -174,6 +172,11 @@ assign o_data_log_from_mem = {bram_data_out_a, bram_data_out_b};
                         addr_count <= addr_count + 1;
                     end
                 end
+            end
+            else if (state == READ) begin
+                addr_count <= {BRAM_ADDR_WIDTH{1'b0}};
+                bram_cs_a <= 1'b0;
+                bram_cs_b <= 1'b0;
             end
             else begin
                 addr_count <= {BRAM_ADDR_WIDTH{1'b0}};
