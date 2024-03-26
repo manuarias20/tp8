@@ -1,7 +1,7 @@
 module bram
 #(
-    parameter BRAM_ADDR_WIDTH = 15;
-    parameter BRAM_DATA_WIDTH = 16;
+    parameter BRAM_ADDR_WIDTH = 15,
+    parameter BRAM_DATA_WIDTH = 16
 ) 
 (
     input                            clk, 

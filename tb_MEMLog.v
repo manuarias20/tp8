@@ -1,7 +1,6 @@
 //! @title MEMLog
 //! @file tb_MEMLOG.v
 
-// `define INPUT_FILE_PATH "/home/manu/vivado_projects/practico06/rtl/valores_TxOut_I.txt"
 `timescale 1ns/1ps
 
 module tb_MEMLOG #(
@@ -20,7 +19,7 @@ module tb_MEMLOG #(
   reg [BRAM_DATA_WIDTH-1:0] i_filter_data;
   reg i_run_log;
   reg i_read_log;
-  reg [BRAM_ADDR_WIDTH-1:0] i_addr_log_to_mem,
+  reg [BRAM_ADDR_WIDTH-1:0] i_addr_log_to_mem;
   reg tb_rst;
   reg tb_clk;
 
@@ -39,14 +38,14 @@ module tb_MEMLOG #(
   always #5 tb_clk = ~tb_clk;
 
   MEMLog
-  u_MEMLog
 #(
     .BRAM_ADDR_WIDTH(BRAM_ADDR_WIDTH),
     .BRAM_DATA_WIDTH(BRAM_DATA_WIDTH)
 )
+u_MEMLog
 (
     .clk(tb_clk),
-    .i_rst(i_rst),
+    .i_rst(tb_rst),
     .i_filter_data(i_filter_data),
     .i_run_log(i_run_log),
     .i_read_log(i_read_log),
@@ -99,7 +98,7 @@ module tb_MEMLOG #(
         end
         else
         begin
-            $display("Todo mal. i=%d. dato esperado = %x. dato leido = %x", i, mem_aux [i], o_data_log_from_mem);
+            $display("Todo mal. addr=%0d. dato esperado = %x. dato leido = %x", i, mem_aux [i], o_data_log_from_mem);
         end
     end
 

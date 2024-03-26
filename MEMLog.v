@@ -20,16 +20,21 @@ module MEMLog
     localparam FULL = 2'd2;
     localparam READ = 2'd3;
 
-    reg state, next_state;
-    
+    reg [1:0] state, next_state;
     reg [BRAM_ADDR_WIDTH - 1 : 0] addr_count;
 
+    reg mem_full;
+    reg data_log_from_mem;
+    wire bram_data_out;
+    reg  bram_rw;   // 0 -> Write, 1 -> Read
+    wire bram_cs;
+
 bram
-u_bram
 #(
     .BRAM_ADDR_WIDTH(BRAM_ADDR_WIDTH),  // 32K x 16 bits
     .BRAM_DATA_WIDTH(BRAM_DATA_WIDTH)
 ) 
+u_bram
 (
     .clk          (clk),
     .addr         (i_addr_log_to_mem),
@@ -38,13 +43,7 @@ u_bram
     .read_n       (~bram_rw),
     .bram_data_in (i_filter_data),
     .bram_data_out(bram_data_out)
-)
-
-reg mem_full;
-reg data_log_from_mem;
-wire bram_data_out;
-reg  bram_rw;   // 0 -> Write, 1 -> Read
-wire bram_cs;
+);
 
 assign o_mem_full = mem_full;
 assign o_data_log_from_mem = data_log_from_mem;
