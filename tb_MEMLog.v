@@ -68,7 +68,7 @@ u_MEMLog
     i_read_log = 0;
     i_addr_log_to_mem = 0;
 
-    for (i = 0; i<(2**BRAM_ADDR_WIDTH); i=i+1) begin
+    for (i = 0; i<(2*(2**BRAM_ADDR_WIDTH)); i=i+1) begin
         mem_aux [i] = $urandom;
     end
 
@@ -77,7 +77,7 @@ u_MEMLog
 
     #10000;
     i_run_log = 1;
-    for (i = 0; i<(2**BRAM_ADDR_WIDTH); i=i+1) begin
+    for (i = 0; i<(2*(2**BRAM_ADDR_WIDTH)); i=i+1) begin
         #10;
         if (i==0) begin
             i_run_log = 0;
@@ -87,7 +87,7 @@ u_MEMLog
 
     #10000;
     i_read_log = 1;
-    for (i = 0; i<(2**BRAM_ADDR_WIDTH); i=i+1) begin
+    for (i = 0; i<(2*(2**BRAM_ADDR_WIDTH)); i=i+1) begin
         i_addr_log_to_mem = i;
         #10;
         if (i==0) begin
@@ -95,7 +95,7 @@ u_MEMLog
         end
         if(o_data_log_from_mem == mem_aux [i])
         begin
-            $display("Ta todo bien loco, no pasa nada. i=%d", i);
+            $display("Ta todo bien loco, no pasa nada. i=%0d", i);
         end
         else
         begin
