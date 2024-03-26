@@ -25,14 +25,21 @@ module registerFile
     input                    i_rst,
     input                    clk
 );
+
 //  COMANDOS DEL UP
-    localparam RESET    = 4'd0;     // Resetear el sistema
-    localparam EN_TX    = 4'd1;     // Habilitar el Tx
-    localparam EN_RX    = 4'd2;     // Habilitar el Rx
-    localparam PH_SEL   = 4'd3;     // Selección de fase del filtro
-    localparam RUN_MEM  = 4'd4;     // Comenzar el logueo de datos en memoria
-    localparam READ_MEM = 4'd5;     // Habilitar la lectura de memoria
-    localparam ADDR_MEM = 4'd6;     // Leer memoria en la direccion indicada
+    localparam RESET    = 8'd0;     // Resetear el sistema
+    localparam EN_TX    = 8'd1;     // Habilitar el Tx
+    localparam EN_RX    = 8'd2;     // Habilitar el Rx
+    localparam PH_SEL   = 8'd3;     // Selección de fase del filtro
+    localparam RUN_MEM  = 8'd4;     // Comenzar el logueo de datos en memoria
+    localparam READ_MEM = 8'd5;     // Habilitar la lectura de memoria
+    localparam ADDR_MEM = 8'd6;     // Leer memoria en la direccion indicada
+    localparam BER_S_I  = 8'd7;     // Leer cantidad de muestras de la BER del canal I
+    localparam BER_S_Q  = 8'd8;     // Leer cantidad de muestras de la BER del canal Q
+    localparam BER_E_I  = 8'd9;     // Leer cantidad de errores de la BER del canal I
+    localparam BER_E_Q  = 8'd10;     // Leer cantidad de errores de la BER del canal Q
+    localparam BER_H    = 8'd11;     // Leer parte alta del ultimo valor de BER
+    localparam IS_MEM_FULL = 8'd12;
 
     reg            [31:0] gpi;
     reg                   rst;
@@ -67,7 +74,7 @@ module registerFile
 
     always @(posedge clk) begin
         if(i_rst) begin
-            // gpo             <= 32'b0;
+            gpi             <= 32'b0;
             rst             <= 1'b0;
             enbTx           <= 1'b0;
             enbRx           <= 1'b0;
@@ -84,8 +91,10 @@ module registerFile
                     EN_TX:     enbTx           <= gpo_data[0];
                     EN_RX:     enbRx           <= gpo_data[0];
                     PH_SEL:    phase_sel       <= gpo_data[1:0];
-                    RUN_MEM:   run_log         <= 1'b1;
+                    RUN_MEM:   begin
+                               run_log         <= 1'b1;
                                read_log        <= 1'b0;
+                    end
                     READ_MEM:   begin
                         if( !i_mem_full ) begin
                             read_log        <= 1'b1;
@@ -97,30 +106,30 @@ module registerFile
                     BER_S_I :
                         begin
                         gpi <= i_ber_samp_I[31:0];
-                        ber_buffer <= i_ber_samp_I;
+                        BER_buffer <= i_ber_samp_I;
                         end
 
                     BER_S_Q :
                         begin
                         gpi <= i_ber_samp_Q[31:0];
-                        ber_buffer <= i_ber_samp_Q;
+                        BER_buffer <= i_ber_samp_Q;
                         end
 
                     BER_E_I :
                         begin
                         gpi <= i_ber_error_I[31:0];
-                        ber_buffer <= i_ber_error_I;
+                        BER_buffer <= i_ber_error_I;
                         end
 
                     BER_E_Q :
                         begin
                         gpi <= i_ber_error_Q[31:0];
-                        ber_buffer <= i_ber_error_Q;
+                        BER_buffer <= i_ber_error_Q;
                         end
                         
-                    BER_HIGH :
+                    BER_H :
                         begin
-                        gpi <= ber_buffer[63:32];  
+                        gpi <= BER_buffer[63:32];  
                         end
 
                     IS_MEM_FULL:  gpi <= i_mem_full;
