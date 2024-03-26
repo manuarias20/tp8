@@ -4,16 +4,16 @@ module MEMLog
     parameter BRAM_DATA_WIDTH = 16
 )
 (
-    input clk,
-    input i_rst,
-  
-    input [BRAM_DATA_WIDTH-1:0] i_filter_data,  // muestras de los canales I ([15:8]) y Q ([7:0])
-    input i_run_log,
-    input i_read_log,
-    input [BRAM_ADDR_WIDTH-1:0] i_addr_log_to_mem,  // dir de memoria
+    input                        clk,
+    input                        i_rst,
+   
+    input  [BRAM_DATA_WIDTH-1:0] i_filter_data,  // muestras de los canales I ([15:8]) y Q ([7:0])
+    input                        i_run_log,
+    input                        i_read_log,
+    input  [BRAM_ADDR_WIDTH-1:0] i_addr_log_to_mem,  // dir de memoria
 
-    output        o_mem_full,
-    output [31:0] o_data_log_from_mem
+    output                       o_mem_full,
+    output [BRAM_DATA_WIDTH-1:0] o_data_log_from_mem
 );
     localparam IDLE = 2'd0; 
     localparam RUN  = 2'd1;
@@ -23,13 +23,13 @@ module MEMLog
     reg [1:0] state, next_state;
     reg [BRAM_ADDR_WIDTH - 1 : 0] addr_count;
 
-    reg mem_full;
-    reg data_log_from_mem;
-    wire bram_data_out;
-    reg  bram_rw;   // 0 -> Write, 1 -> Read
-    wire bram_cs;
-    reg addr_mem;
-    wire addr_mem_bram;
+    reg                        mem_full;
+    reg  [BRAM_DATA_WIDTH-1:0] data_log_from_mem;
+    wire [BRAM_DATA_WIDTH-1:0] bram_data_out;
+    reg                        bram_rw;   // 0 -> Write, 1 -> Read
+    wire                       bram_cs;
+    reg  [BRAM_ADDR_WIDTH-1:0] addr_mem;
+    wire [BRAM_ADDR_WIDTH-1:0] addr_mem_bram;
 
 bram
 #(
