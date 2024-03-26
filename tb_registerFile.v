@@ -18,8 +18,8 @@ module tb_registerFile #(
   localparam BER_S_I  = 8'd7;     // Leer cantidad de muestras de la BER del canal I
   localparam BER_S_Q  = 8'd8;     // Leer cantidad de muestras de la BER del canal Q
   localparam BER_E_I  = 8'd9;     // Leer cantidad de errores de la BER del canal I
-  localparam BER_E_Q  = 8'd10;     // Leer cantidad de errores de la BER del canal Q
-  localparam BER_H    = 8'd11;     // Leer parte alta del ultimo valor de BER
+  localparam BER_E_Q  = 8'd10;    // Leer cantidad de errores de la BER del canal Q
+  localparam BER_H    = 8'd11;    // Leer parte alta del ultimo valor de BER
   
   //! DUT inputs
   reg                    tb_rst;
