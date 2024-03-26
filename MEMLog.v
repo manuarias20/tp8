@@ -1,17 +1,16 @@
 module MEMLog
 #(
-    parameter NB_ADD_MEM      = 14,
     parameter BRAM_ADDR_WIDTH = 15,
-    parameter BRAM_DATA_WIDTH = 32
+    parameter BRAM_DATA_WIDTH = 16
 )
 (
     input clk,
     input i_rst,
   
-    input i_filter_data,
+    input [BRAM_DATA_WIDTH-1:0] i_filter_data,  // muestras de los canales I ([15:8]) y Q ([7:0])
     input i_run_log,
     input i_read_log,
-    input [NB_ADD_MEM-1:0] i_addr_log_to_mem,
+    input [BRAM_ADDR_WIDTH-1:0] i_addr_log_to_mem,  // dir de memoria
 
     output        o_mem_full,
     output [31:0] o_data_log_from_mem
@@ -28,8 +27,8 @@ module MEMLog
 bram
 u_bram
 #(
-    .BRAM_ADDR_WIDTH(15),  // 32K x 32 bits
-    .BRAM_DATA_WIDTH(32)
+    .BRAM_ADDR_WIDTH(BRAM_ADDR_WIDTH),  // 32K x 16 bits
+    .BRAM_DATA_WIDTH(BRAM_DATA_WIDTH)
 ) 
 (
     .clk          (clk),
@@ -44,8 +43,8 @@ u_bram
 reg mem_full;
 reg data_log_from_mem;
 wire bram_data_out;
+reg  bram_rw;   // 0 -> Write, 1 -> Read
 wire bram_cs;
-wire bram_rw;   // 0 -> Write, 1 -> Read
 
 assign o_mem_full = mem_full;
 assign o_data_log_from_mem = data_log_from_mem;
@@ -90,8 +89,6 @@ assign bram_cs = 1'b0;
             begin
                 if (i_run_log) 
                     next_state = RUN;
-                else if(i_rst)
-                    next_state = IDLE;
                 else
                     next_state = state;
             end
@@ -111,21 +108,25 @@ assign bram_cs = 1'b0;
         begin
             mem_full = 0;
             data_log_from_mem = 32'b0;
+            bram_rw  = 0;
         end 
         RUN: 
         begin
             mem_full = 0;
             data_log_from_mem = 32'b0;
+            bram_rw  = 0;
         end 
         FULL: 
         begin
             mem_full = 1;
             data_log_from_mem = 32'b0;
+            bram_rw  = 1;
         end 
         READ: 
         begin
             mem_full = 1;
             data_log_from_mem = bram_data_out;
+            bram_rw  = 1;
         end 
     endcase
 
@@ -138,14 +139,14 @@ assign bram_cs = 1'b0;
         end else begin
             if (state == RUN) begin
                 if (addr_count == {BRAM_ADDR_WIDTH{1'b1}}) begin
-                    addr_count <= 0;
+                    addr_count <= {BRAM_ADDR_WIDTH{1'b0}};
                 end
                 else begin
                     addr_count <= addr_count + 1;
                 end
             end
             else begin
-                addr_count <= addr_count;
+                addr_count <= {BRAM_ADDR_WIDTH{1'b0}};
             end
         end
     end
