@@ -91,7 +91,7 @@ assign o_data_log_from_mem = {bram_data_out_b, bram_data_out_a};
             end
             RUN:
             begin
-                if (addr_count == {BRAM_ADDR_WIDTH{1'b1}} )     // si se llena la memoria
+                if (addr_count == {BRAM_ADDR_WIDTH{1'b1}} && bram_cs_a)     // si se llena la memoria
                     next_state = FULL;
                 else
                     next_state = state;
