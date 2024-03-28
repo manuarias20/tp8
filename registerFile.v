@@ -27,18 +27,18 @@ module registerFile
 );
 
 //  COMANDOS DEL UP
-    localparam RESET    = 8'd0;     // Resetear el sistema
-    localparam EN_TX    = 8'd1;     // Habilitar el Tx
-    localparam EN_RX    = 8'd2;     // Habilitar el Rx
-    localparam PH_SEL   = 8'd3;     // Selección de fase del filtro
-    localparam RUN_MEM  = 8'd4;     // Comenzar el logueo de datos en memoria
-    localparam READ_MEM = 8'd5;     // Habilitar la lectura de memoria
-    localparam ADDR_MEM = 8'd6;     // Leer memoria en la direccion indicada
-    localparam BER_S_I  = 8'd7;     // Leer cantidad de muestras de la BER del canal I
-    localparam BER_S_Q  = 8'd8;     // Leer cantidad de muestras de la BER del canal Q
-    localparam BER_E_I  = 8'd9;     // Leer cantidad de errores de la BER del canal I
-    localparam BER_E_Q  = 8'd10;     // Leer cantidad de errores de la BER del canal Q
-    localparam BER_H    = 8'd11;     // Leer parte alta del ultimo valor de BER
+    localparam RESET       = 8'd0;     // Resetear el sistema
+    localparam EN_TX       = 8'd1;     // Habilitar el Tx
+    localparam EN_RX       = 8'd2;     // Habilitar el Rx
+    localparam PH_SEL      = 8'd3;     // Selección de fase del filtro
+    localparam RUN_MEM     = 8'd4;     // Comenzar el logueo de datos en memoria
+    localparam READ_MEM    = 8'd5;     // Habilitar la lectura de memoria
+    localparam ADDR_MEM    = 8'd6;     // Leer memoria en la direccion indicada
+    localparam BER_S_I     = 8'd7;     // Leer cantidad de muestras de la BER del canal I
+    localparam BER_S_Q     = 8'd8;     // Leer cantidad de muestras de la BER del canal Q
+    localparam BER_E_I     = 8'd9;     // Leer cantidad de errores de la BER del canal I
+    localparam BER_E_Q     = 8'd10;     // Leer cantidad de errores de la BER del canal Q
+    localparam BER_H       = 8'd11;     // Leer parte alta del ultimo valor de BER
     localparam IS_MEM_FULL = 8'd12;
 
     reg            [31:0] gpi;
@@ -96,10 +96,10 @@ module registerFile
                                read_log        <= 1'b0;
                     end
                     READ_MEM:   begin
-                        if( !i_mem_full ) begin
+                        if( i_mem_full ) begin
                             read_log        <= 1'b1;
                             // run_log         <= 1'b0;
-                            addr_log_to_mem <= gpo_data[13:0];
+                            addr_log_to_mem <= gpo_data[NB_ADDR_MEM-1:0];
                         end 
                     end
 
@@ -137,8 +137,10 @@ module registerFile
                     // default:
                 endcase
             end
-            else if(read_log)
-                gpi <= i_data_log_from_mem;
+            else if(read_log) begin
+                gpi      <= i_data_log_from_mem;
+                read_log <= 0;
+            end
             else if(run_log) begin
                 run_log <= 0;
             end
