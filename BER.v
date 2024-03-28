@@ -9,17 +9,18 @@
 
 module BER
   #(
-    parameter NB_INPUT   = 8,     //! NB of output
-    parameter NBF_INPUT  = 7,     //! NBF of output
-    parameter N_SAMPLES  = 511,   //! Number of samples for each position of the delay register
-    parameter N_POS      = 511,   //! Number of positions of the delay register
-    parameter N_PHASES   = 4,     //! Number of phases
-    parameter SEED       = 9'h1AA //! PRBS seed
+    parameter NB_INPUT   = 8,      //! NB of output
+    parameter NBF_INPUT  = 7,      //! NBF of output
+    parameter N_SAMPLES  = 511,    //! Number of samples for each position of the delay register
+    parameter N_POS      = 511,    //! Number of positions of the delay register
+    parameter N_PHASES   = 4,      //! Number of phases
+    parameter SEED       = 9'h1AA, //! PRBS seed
+    parameter NB_BER_CNT = 64      //! NB of BER counters
   ) 
   (
     output                        o_ber_zero ,   //! Output BER equal to zero
-    output                        o_ber_samp ,   //! Output BER sample counter
-    output                        o_ber_error,   //! Output BER error counter
+    output       [NB_BER_CNT-1:0] o_ber_samp ,   //! Output BER sample counter
+    output       [NB_BER_CNT-1:0] o_ber_error,   //! Output BER error counter
     input          [NB_INPUT-1:0] i_data     ,   //! Input Sample
     input                         i_en       ,   //! Enable
     input                         i_valid    ,   //! Valid
