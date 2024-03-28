@@ -4,16 +4,16 @@ module MEMLog
     parameter BRAM_DATA_WIDTH = 16
 )
 (
-    input                          clk,
-    input                          i_rst,
+    output                         o_mem_full,
+    output [2*BRAM_DATA_WIDTH-1:0] o_data_log_from_mem,
      
     input  [BRAM_DATA_WIDTH-1:0]   i_filter_data,  // muestras de los canales I ([15:8]) y Q ([7:0])
     input                          i_run_log,
     input                          i_read_log,
     input  [BRAM_ADDR_WIDTH-1:0]   i_addr_log_to_mem,  // dir de memoria
   
-    output                         o_mem_full,
-    output [2*BRAM_DATA_WIDTH-1:0] o_data_log_from_mem
+    input                          i_rst,
+    input                          clk
 );
     localparam IDLE = 2'd0; 
     localparam RUN  = 2'd1;

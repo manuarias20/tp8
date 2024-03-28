@@ -22,6 +22,7 @@ module dsp
     parameter NB_BER_CNT    = 64
   ) 
   (
+    output      [NB_LEDS-1:0] o_filter_data, //! Tx Filter outputs. I ([15:8]) & Q ([7:0]).
     output      [NB_LEDS-1:0] o_led        , //! i_rstn->o_led[0]. EnbTx->o_led[1]. EnbRx->o_led[2]. BER=0->o_led[3].
     output   [NB_BER_CNT-1:0] o_ber_samp_I , //! Ber sample counter (I)
     output   [NB_BER_CNT-1:0] o_ber_samp_Q , //! Ber sample counter (Q)
@@ -34,7 +35,7 @@ module dsp
 
 
   //! Internal Signals
-  wire                    control_o_valid         ; //! Control o_valid
+  wire                    control_o_valid;          //! Control o_valid
   wire                    data_prbs9I_tx_to_RC_TxI; //! Data from prbs9I_tx to RC_TxI
   wire                    data_prbs9Q_tx_to_RC_TxQ; //! Data from prbs9Q_tx to RC_TxQ
   wire [NB_OUTPUT_TX-1:0] data_RC_TxI_to_BER_I;     //! Data from RC_TxI to BER_I
@@ -49,14 +50,17 @@ module dsp
   wire    [NB_SWITCH-1:0] sw_w;
   wire                    reset;
 
-  assign  sw_w = (sel_mux) ?  sw_from_vio    :  i_sw;
-  assign reset = (sel_mux) ? ~reset_from_vio : ~i_rstn;
+  assign  sw_w = i_sw;
+  // assign  sw_w = (sel_mux) ?  sw_from_vio    :  i_sw;
+  assign reset = ~i_rstn;
+  // assign reset = (sel_mux) ? ~reset_from_vio : ~i_rstn;
 
   //! Assignments
-  assign o_led[0] = reset; 
-  assign o_led[1] = sw_w[0]; 
-  assign o_led[2] = sw_w[1]; 
-  assign o_led[3] = o_ber_zero_I & o_ber_zero_Q; 
+  assign o_filter_data = {data_RC_TxI_to_BER_I, data_RC_TxQ_to_BER_Q};
+  assign o_led[0]      = reset; 
+  assign o_led[1]      = sw_w[0]; 
+  assign o_led[2]      = sw_w[1]; 
+  assign o_led[3]      = o_ber_zero_I & o_ber_zero_Q; 
 
   //! Instances
   //! Control
@@ -181,7 +185,7 @@ module dsp
         .clk    (clk)
       );
       
-    ila
+    /*ila
     u_ila
     (.clk_0(clk),
      .probe0_0(o_led));
@@ -192,5 +196,5 @@ module dsp
      .probe_out0_0(sel_mux),
      .probe_out1_0(sw_from_vio),
      .probe_out2_0(reset_from_vio));
-
+*/
 endmodule
