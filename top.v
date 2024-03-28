@@ -13,7 +13,7 @@ module top #(
    input  wire [NB_GPIOS - 1 : 0] gpo0       ,
   //  input  wire                   in_rx_uart ,
    input  wire                    i_resetn   ,
-   input  wire                    i_sw       ,
+  //  input  wire                    i_sw       ,
    input                          clk100
    );
 
