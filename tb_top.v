@@ -47,8 +47,8 @@ u_top
     .o_led(o_led),
     .o_led_RGB0(o_led_RGB0),
     .o_led_RGB1(o_led_RGB1),
-    .gpi0(o_gpi),
-    .gpo0(i_gpo),
+    .o_gpi(o_gpi),
+    .i_gpo(i_gpo),
     .i_resetn(~tb_rst),
     .clk100(tb_clk)
 );
@@ -71,55 +71,55 @@ u_top
         #10     tb_rst    = 0;
         #20     i_gpo     = {RESET, 1'b1, 23'b1}; //comando de reset
         #10     i_gpo[23] = 1'b0;   //toggle enable
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
+        $display("%1t:      %x        %x      RESET",$time, i_gpo, o_gpi);
         #20     i_gpo     = {EN_TX, 1'b1, 23'b1}; // Enable Tx
         #10     i_gpo[23] = 1'b0;
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
+        $display("%1t:      %x        %x      EN_TX",$time, i_gpo, o_gpi);
         #20     i_gpo     = {EN_RX, 1'b1, 23'b1}; // Enable Rx
         #10     i_gpo[23] = 1'b0;   
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
+        $display("%1t:      %x        %x      EN_RX",$time, i_gpo, o_gpi);
         #20     i_gpo     = {PH_SEL, 1'b1, 23'd0}; // Fase = 0
         #10     i_gpo[23] = 1'b0;   
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
+        $display("%1t:      %x        %x      PH_SEL = 0",$time, i_gpo, o_gpi);
         #20     i_gpo     = {PH_SEL, 1'b1, 23'd1}; // Fase = 1
         #10     i_gpo[23] = 1'b0;   
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
+        $display("%1t:      %x        %x      PH_SEL = 1",$time, i_gpo, o_gpi);
         #20     i_gpo     = {PH_SEL, 1'b1, 23'd2}; // Fase = 2
         #10     i_gpo[23] = 1'b0;   
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
+        $display("%1t:      %x        %x      PH_SEL = 2",$time, i_gpo, o_gpi);
         #20     i_gpo     = {PH_SEL, 1'b1, 23'd3}; // Fase = 3
         #10     i_gpo[23] = 1'b0;   
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
+        $display("%1t:      %x        %x      PH_SEL = 3",$time, i_gpo, o_gpi);
         #20     i_gpo     = {BER_S_I, 1'b1, 23'b0}; // 
         #10     i_gpo[23] = 1'b0;   
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
+        $display("%1t:      %x        %x      BER_S_I",$time, i_gpo, o_gpi);
         #20     i_gpo     = {BER_S_Q, 1'b1, 23'b0}; // 
         #10     i_gpo[23] = 1'b0;   
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
+        $display("%1t:      %x        %x      BER_S_Q",$time, i_gpo, o_gpi);
         #20     i_gpo     = {BER_E_I, 1'b1, 23'b0}; // 
         #10     i_gpo[23] = 1'b0;   
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
+        $display("%1t:      %x        %x      BER_E_I",$time, i_gpo, o_gpi);
         #20     i_gpo     = {BER_E_Q, 1'b1, 23'b0}; // 
         #10     i_gpo[23] = 1'b0;   
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
+        $display("%1t:      %x        %x      BER_E_Q",$time, i_gpo, o_gpi);
         #20     i_gpo     = {BER_H, 1'b1, 23'b0}; // 
         #10     i_gpo[23] = 1'b0;   
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
+        $display("%1t:      %x        %x      BER_H",$time, i_gpo, o_gpi);
         #20     i_gpo     = {IS_MEM_FULL, 1'b1, 23'b0}; // 
         #10     i_gpo[23] = 1'b0;
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
+        $display("%1t:      %x        %x      IS_MEM_FULL",$time, i_gpo, o_gpi);
         #20     i_gpo     = {RUN_MEM, 1'b1, 23'b0}; // 
         #10     i_gpo[23] = 1'b0;
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
-        #10     i_mem_full          = 1;
-        #10     i_data_log_from_mem = 32'hAF0F;
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
+        $display("%1t:      %x        %x      RUN_MEM",$time, i_gpo, o_gpi);
         #20     i_gpo     = {IS_MEM_FULL, 1'b1, 23'b0}; // 
         #10     i_gpo[23] = 1'b0;
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
+        $display("%1t:      %x        %x      IS_MEM_FULL",$time, i_gpo, o_gpi);
+        #20000  i_gpo     = {IS_MEM_FULL, 1'b1, 23'b0}; // 
+        #10     i_gpo[23] = 1'b0;
+        $display("%1t:      %x        %x      IS_MEM_FULL",$time, i_gpo, o_gpi);
         #20     i_gpo     = {READ_MEM, 1'b1, 23'b01101011110101100011100}; // 
         #10     i_gpo[23] = 1'b0;
-        $display("%1t: %x      %x",$time, i_gpo, o_gpi);
+        $display("%1t:      %x        %x      READ_MEM",$time, i_gpo, o_gpi);
         #100;
         
 

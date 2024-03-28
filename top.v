@@ -9,8 +9,8 @@ module top #(
    output             [3 - 1 : 0] o_led_RGB0 ,
    output             [3 - 1 : 0] o_led_RGB1 ,
   //  output wire                   out_tx_uart,
-   output wire [NB_GPIOS - 1 : 0] gpi0       ,
-   input  wire [NB_GPIOS - 1 : 0] gpo0       ,
+   output wire [NB_GPIOS - 1 : 0] o_gpi      ,
+   input  wire [NB_GPIOS - 1 : 0] i_gpo      ,
   //  input  wire                   in_rx_uart ,
    input  wire                    i_resetn   ,
   //  input  wire                    i_sw       ,
@@ -20,9 +20,12 @@ module top #(
    ///////////////////////////////////////////
    // Vars
    ///////////////////////////////////////////
-   // Descomentar para usar el uBlaze
-  //  wire [NB_GPIOS                 - 1 : 0]           gpo0;
-  //  wire [NB_GPIOS                 - 1 : 0]           gpi0;
+   wire [NB_GPIOS                 - 1 : 0]           gpo0;
+   wire [NB_GPIOS                 - 1 : 0]           gpi0;
+   
+   assign gpo0 = i_gpo;
+   assign o_gpi = gpi0;
+
 
    wire                                              clockdsp;
 
@@ -111,7 +114,7 @@ module top #(
    ///////////////////////////////////////////
    registerFile
     u_registerFile 
-      (.o_gpio(gpi0)                          ,
+      (.o_gpi(gpi0)                          ,
        .o_rst(rst_RF_to_DSP)                  ,
        .o_enbTx(EnbTx)                        ,
        .o_enbRx(EnbRx)                        ,
@@ -119,13 +122,13 @@ module top #(
        .o_run_log(run_log)                    ,
        .o_read_log(read_log)                  ,
        .o_addr_log_to_mem(addr_log_to_mem)    ,
-       .i_gpio(gpo0)                          ,
+       .i_gpo(gpo0)                          ,
        .i_data_log_from_mem(data_log_from_mem),
        .i_mem_full(mem_full)                  ,
        .i_ber_samp_I(ber_samp_I)              ,   
        .i_ber_samp_Q(ber_samp_Q)              ,   
        .i_ber_error_I(ber_error_I)            ,   
-       .i_ber_error_I(ber_error_Q)            ,   
+       .i_ber_error_Q(ber_error_Q)            ,   
        .i_rst(reset)                          ,   //! Reset
        .clk(clk100)                               //! Clock
    );
@@ -148,7 +151,7 @@ module top #(
    ///////////////////////////////////////////
    // DSP
    ///////////////////////////////////////////
-   DSP
+   dsp
     u_dsp 
     (
      .o_filter_data(filter_data),  //! Tx Filter outputs. I ([15:8]) & Q ([7:0]).
@@ -176,13 +179,13 @@ module top #(
    assign o_led[2] = EnbTx;
    assign o_led[3] = EnbRx;
 
-   assign out_led_RGB0[0] = mem_full;
-   assign out_led_RGB0[1] = read_log;
-   assign out_led_RGB0[2] = run_log;
+   assign o_led_RGB0[0] = mem_full;
+   assign o_led_RGB0[1] = read_log;
+   assign o_led_RGB0[2] = run_log;
 
-   assign out_led_RGB1[0] = phase_sel[0];
-   assign out_led_RGB1[1] = phase_sel[1];
-   assign out_led_RGB1[2] = 1'b0;
+   assign o_led_RGB1[0] = phase_sel[0];
+   assign o_led_RGB1[1] = phase_sel[1];
+   assign o_led_RGB1[2] = 1'b0;
 
 
 

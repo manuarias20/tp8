@@ -24,7 +24,7 @@ module BER
     input          [NB_INPUT-1:0] i_data     ,   //! Input Sample
     input                         i_en       ,   //! Enable
     input                         i_valid    ,   //! Valid
-    input         [NB_PHASES-1:0] i_phase_sel,   //! Phase selector
+    input          [N_PHASES-1:0] i_phase_sel,   //! Phase selector
     input                         i_rst      ,   //! Reset
     input                         clk            //! Clock
   );
@@ -39,8 +39,7 @@ module BER
   localparam NB_PHASES   = $clog2(N_PHASES);
   localparam NB_SAMPLES  = $clog2(N_SAMPLES);
   localparam NB_POS      = $clog2(N_POS);
-  localparam NB_BER_CNT  = 64;
-  localparam MAX_SAMPLES = 2 ** 64 - 1;
+  localparam MAX_SAMPLES = 2 ** NB_BER_CNT - 1;
 
   //! Internal Signals
   reg    [NB_INPUT-1:0]            phase       ; //! Phase selected
