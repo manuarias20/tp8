@@ -108,17 +108,28 @@ u_top
         #20     i_gpo     = {IS_MEM_FULL, 1'b1, 23'b0}; // 
         #10     i_gpo[23] = 1'b0;
         $display("%1t:      %x        %x      IS_MEM_FULL",$time, i_gpo, o_gpi);
+        #2000000;
         #20     i_gpo     = {RUN_MEM, 1'b1, 23'b0}; // 
         #10     i_gpo[23] = 1'b0;
         $display("%1t:      %x        %x      RUN_MEM",$time, i_gpo, o_gpi);
         #20     i_gpo     = {IS_MEM_FULL, 1'b1, 23'b0}; // 
         #10     i_gpo[23] = 1'b0;
         $display("%1t:      %x        %x      IS_MEM_FULL",$time, i_gpo, o_gpi);
-        #20000  i_gpo     = {IS_MEM_FULL, 1'b1, 23'b0}; // 
+        #2000000;
+        #20     i_gpo     = {IS_MEM_FULL, 1'b1, 23'b0}; // 
         #10     i_gpo[23] = 1'b0;
         $display("%1t:      %x        %x      IS_MEM_FULL",$time, i_gpo, o_gpi);
-        #20     i_gpo     = {READ_MEM, 1'b1, 23'b01101011110101100011100}; // 
-        #10     i_gpo[23] = 1'b0;
+        #20     i_gpo     = {READ_MEM, 1'b1, 23'b010101010011100}; // 
+        #20     i_gpo[23] = 1'b0;
+        $display("%1t:      %x        %x      READ_MEM",$time, i_gpo, o_gpi);
+        #20     i_gpo     = {READ_MEM, 1'b1, 23'b100001100011100}; // 
+        #20     i_gpo[23] = 1'b0;
+        $display("%1t:      %x        %x      READ_MEM",$time, i_gpo, o_gpi);
+        #20     i_gpo     = {READ_MEM, 1'b1, 23'b000100000011100}; // 
+        #20     i_gpo[23] = 1'b0;
+        $display("%1t:      %x        %x      READ_MEM",$time, i_gpo, o_gpi);
+        #20     i_gpo     = {READ_MEM, 1'b1, 23'b010101101111001}; // 
+        #20     i_gpo[23] = 1'b0;
         $display("%1t:      %x        %x      READ_MEM",$time, i_gpo, o_gpi);
         #100;
         

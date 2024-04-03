@@ -22,15 +22,15 @@ module dsp
     parameter NB_BER_CNT    = 64
   ) 
   (
-    output      [NB_LEDS-1:0] o_filter_data, //! Tx Filter outputs. I ([15:8]) & Q ([7:0]).
-    output      [NB_LEDS-1:0] o_led        , //! i_rstn->o_led[0]. EnbTx->o_led[1]. EnbRx->o_led[2]. BER=0->o_led[3].
-    output   [NB_BER_CNT-1:0] o_ber_samp_I , //! Ber sample counter (I)
-    output   [NB_BER_CNT-1:0] o_ber_samp_Q , //! Ber sample counter (Q)
-    output   [NB_BER_CNT-1:0] o_ber_error_I, //! Ber error counter (I)
-    output   [NB_BER_CNT-1:0] o_ber_error_Q, //! Ber error counter (Q)
-    input     [NB_SWITCH-1:0] i_sw         , //! i_sw[0]->EnbTx. i_sw[1]->EnbRx. i_sw[3:2]->Phase selector.
-    input                     i_rstn       , //! Reset (active low)
-    input                     clk            //! Clock
+    output [2*NB_OUTPUT_TX-1:0] o_filter_data, //! Tx Filter outputs. I ([15:8]) & Q ([7:0]).
+    output        [NB_LEDS-1:0] o_led        , //! i_rstn->o_led[0]. EnbTx->o_led[1]. EnbRx->o_led[2]. BER=0->o_led[3].
+    output     [NB_BER_CNT-1:0] o_ber_samp_I , //! Ber sample counter (I)
+    output     [NB_BER_CNT-1:0] o_ber_samp_Q , //! Ber sample counter (Q)
+    output     [NB_BER_CNT-1:0] o_ber_error_I, //! Ber error counter (I)
+    output     [NB_BER_CNT-1:0] o_ber_error_Q, //! Ber error counter (Q)
+    input       [NB_SWITCH-1:0] i_sw         , //! i_sw[0]->EnbTx. i_sw[1]->EnbRx. i_sw[3:2]->Phase selector.
+    input                       i_rstn       , //! Reset (active low)
+    input                       clk            //! Clock
   );
 
 
