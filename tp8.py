@@ -19,14 +19,57 @@ print(ser.timeout)
 
 sendData = 0x00000000
 splitData = ['','','','']
-while 1 :
 
-    inputData = input('Ingrese el nro de LED que quiere manipular (0,1,2,3). Ingrese 4 si quiere leer el estado de los switch. O escriba "exit" para salir.\r\n<<')
-    # inputData = str(inputData)
+print("Comandos:")
+print("\t RESET - Resetea los valores del sistema")
+print("\t EN_TX - Habilita la PRBS y el filtro transmisor")
+print("\t EN_RX")
+print("\t PH_SEL [0-3]")
+print("\t RUN_MEM")
+print("\t READ_MEM")
+print("\t BER_S_I")
+print("\t BER_S_Q")
+print("\t BER_E_I")
+print("\t BER_E_Q")
+print("\t BER_H")
+print("\t IS_MEM_FULL")
+print("\t read")
+print("\t <num comando> <data value>")
+print("\t exit")
+print(COMANDOS)
+    
+while 1 :
+    print('''Comandos:
+           RESET       - Resetea los valores del sistema.
+           EN_TX       - Habilita la PRBS y el filtro transmisor.
+           EN_RX       - Habilita la BER.
+           PH_SEL[0-3] - Selecciona la fase para el down sampling.
+           RUN_MEM     - Comienza a guardar los datos del filtro Tx en memoria.
+           READ_MEM    - Lee la memoria por completo.
+           ADDR_MEM    - Lee un dato de una dirección específica de memoria.
+           BER_S_I     - Lee los 32 bits menos significativos de la cantidad de muestras de la BER en el canal I.
+           BER_S_Q     - Lee los 32 bits menos significativos de la cantidad de muestras de la BER en el canal Q.
+           BER_E_I     - Lee los 32 bits menos significativos de la cantidad de errores de la BER en el canal I.
+           BER_E_Q     - Lee los 32 bits menos significativos de la cantidad de errores de la BER en el canal Q.
+           BER_H       - Lee los 32 bits mas significativos de la cantidad leida anteriormente.
+           IS_MEM_FULL - Verifica si la memoria está llena.''')
+    inputData = input('''Ingrese el comando que quiere enviar. O escriba "exit" para salir.\r\n<<''')
     if inputData == 'exit':
         ser.close()
         exit()
-    elif inputData in ['0','1','2','3']:
+    elif inputData == 'RESET':
+    elif inputData == 'EN_TX':
+    elif inputData == 'EN_RX':
+    elif inputData == 'PH_SEL[0-3]':
+    elif inputData == 'PH_SEL[0-3]':
+    elif inputData == 'PH_SEL[0-3]':
+    elif inputData == 'PH_SEL[0-3]':
+    elif inputData == 'RUN_MEM':
+    elif inputData == 'RESET':
+    elif inputData == 'RESET':
+    elif inputData == 'RESET':
+    elif inputData == 'RESET':
+    elif inputData == 'RESET':
         if inputData == '0':
             print("Para el LED 0:")
             inputData = input("Desea encender algun color del LED 0? y/n:\r\n<<")
