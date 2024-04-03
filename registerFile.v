@@ -51,7 +51,6 @@ module registerFile
     reg [NB_ADDR_MEM-1:0] addr_log_to_mem;
 
     reg                   prev_enable;
-    reg                   BER_flag;
     reg             [1:0] BER_cnt;
     reg           [127:0] BER_buffer;
 
@@ -83,7 +82,6 @@ module registerFile
             read_log        <= 1'b0;
             addr_log_to_mem <= {NB_ADDR_MEM{1'b0}};
             prev_enable     <= 1'b0;
-            BER_flag        <= 4'b0000;
         end else begin
             if((gpo_enable == 1'b1) && (prev_enable == 1'b0)) begin
                 case(gpo_command)

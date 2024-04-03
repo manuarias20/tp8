@@ -8,12 +8,11 @@ module top #(
    output wire  [NB_LEDS - 1 : 0] o_led      , //! lock_clk -> o_led[0]. o_rst -> o_led[1]. o_enb[0] -> o_led[2]. o_enb[1] -> o_led[3].
    output             [3 - 1 : 0] o_led_RGB0 ,
    output             [3 - 1 : 0] o_led_RGB1 ,
-  //  output wire                   out_tx_uart,
-   output wire [NB_GPIOS - 1 : 0] o_gpi      ,
-   input  wire [NB_GPIOS - 1 : 0] i_gpo      ,
-  //  input  wire                   in_rx_uart ,
+   output wire                    out_tx_uart,
+  //  output wire [NB_GPIOS - 1 : 0] o_gpi      ,
+  //  input  wire [NB_GPIOS - 1 : 0] i_gpo      ,
+   input  wire                    in_rx_uart ,
    input  wire                    i_resetn   ,
-  //  input  wire                    i_sw       ,
    input                          clk100
    );
 
@@ -23,8 +22,8 @@ module top #(
    wire [NB_GPIOS                 - 1 : 0]           gpo0;
    wire [NB_GPIOS                 - 1 : 0]           gpi0;
    
-   assign gpo0 = i_gpo;
-   assign o_gpi = gpi0;
+  //  assign gpo0 = i_gpo;
+  //  assign o_gpi = gpi0;
 
 
    wire                                              clockdsp;
@@ -47,7 +46,7 @@ module top #(
    /////////////////////////////////////////////////////////////////////////////////////
    // For DSP
    /////////////////////////////////////////////////////////////////////////////////////
-   wire                            [3 : 0]           rst_RF_to_DSP;   
+   wire                                              rst_RF_to_DSP;   
    wire                            [3 : 0]           dsp_sw;           // dsp_sw[3:0]->dsp.i_sw[3:0]
    wire                            [3 : 0]           dsp_o_led;        // dsp.o_led[3:0]->dsp_o_led[3:0]->vio
    wire                           [63 : 0]           ber_samp_I;       
@@ -67,14 +66,13 @@ module top #(
 
    //////////////////////////////////////////////////////////////
    // Descomentar en caso de incluir el VIO
-  //  wire                                              fromHard;
-  //  wire [3  : 0]                                     fromVio;
+   wire                                              fromHard;
    
    ///////////////////////////////////////////
    // MicroBlaze
    ///////////////////////////////////////////
    //design_1
-   /*MicroGPIO
+   MicroGPIO
      u_micro
        (.clock100         (clockdsp    ),  // Clock aplicacion
         .gpio_rtl_tri_o   (gpo0        ),  // GPIO
@@ -85,30 +83,24 @@ module top #(
         .usb_uart_rxd     (in_rx_uart  ),  // UART
         .usb_uart_txd     (out_tx_uart )   // UART
         );
-   */
-   assign reset = ~i_resetn;
-  //  assign reset = (fromHard) ? ~i_resetn : i_reset_from_vio;
-
-  //  assign gpi0[3  : 0] = (fromHard) ? i_sw : fromVio; // Descomentar en caso de incluir el VIO
-  //  assign gpi0[3  : 0] = i_sw; // Comentar en caso de incluir el VIO
-  //  assign gpi0[31 : 4] = {28{1'b0}};
+   
+  //  assign reset = ~i_resetn; // Comentar en caso de incluir el VIO
+   assign reset = (fromHard) ? ~i_resetn : i_reset_from_vio; // Descomentar en caso de incluir el VIO
 
    ///////////////////////////////////////////
    // Descomentar en caso de incluir el VIO
-   /*
+   
    vio
    u_vio
-   (.clk_0        (clockdsp),
-    .probe_in0_0  ({gpo0[2] ,gpo0[1] ,gpo0[0]}),
-    .probe_in1_0  ({gpo0[5] ,gpo0[4] ,gpo0[3]}),
-    .probe_in2_0  ({gpo0[8] ,gpo0[7] ,gpo0[6]}),
-    .probe_in3_0  ({gpo0[11],gpo0[10],gpo0[9]}),
-    .probe_in4_0  (dsp_o_led[3],dsp_o_led[2],dsp_o_led[1],dsp_o_led[0]),
-    .probe_out0_0 (fromHard),
-    .probe_out1_0 (fromVio),
-    .probe_out2_0 (i_reset_from_vio)
+   (.clk_0                     (clockdsp),
+    .probe_in0_o_led           ({o_led[3], o_led[2] ,o_led[1] ,o_led[0]}),
+    .probe_in1_o_led_RGB0      ({o_led_RGB0[2] ,o_led_RGB0[1] ,o_led_RGB0[0]}),
+    .probe_in2_o_led_RGB1      ({o_led_RGB1[2] ,o_led_RGB1[1] ,o_led_RGB1[0]}),
+    .probe_in3_o_dsp_o_led     ({dsp_o_led[3],dsp_o_led[2],dsp_o_led[1],dsp_o_led[0]}),
+    .probe_out0_fromHard       (fromHard),
+    .probe_out1_reset_from_vio (i_reset_from_vio)
     );
-    */
+    
    ///////////////////////////////////////////
    // Register File
    ///////////////////////////////////////////
@@ -186,9 +178,5 @@ module top #(
    assign o_led_RGB1[0] = phase_sel[0];
    assign o_led_RGB1[1] = phase_sel[1];
    assign o_led_RGB1[2] = 1'b0;
-
-
-
-   //.out_rf_to_micro_data  (gpi0),
 
 endmodule // top
