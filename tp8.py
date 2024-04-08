@@ -5,6 +5,57 @@ import sys
 # portUSB = sys.argv[1]
 # portUSB = 1
 
+def enviar_puerto_serie(data_to_send):
+    # Envio de datos por puerto serie
+    splitData = ['','','','']
+    splitData[0] = (data_to_send&0xFF).to_bytes(1, byteorder = "big")
+    splitData[1] = ((data_to_send>>8)&0xFF).to_bytes(1, byteorder = "big")
+    splitData[2] = ((data_to_send>>16)&0xFF).to_bytes(1, byteorder = "big")
+    splitData[3] = ((data_to_send>>24)&0xFF).to_bytes(1, byteorder = "big")
+    print('splitData')
+    print(splitData[0])
+    print(splitData[1])
+    print(splitData[2])
+    print(splitData[3])
+
+    ser.write(splitData[0])
+    ser.write(splitData[1])
+    ser.write(splitData[2])
+    ser.write(splitData[3])
+    time.sleep(1)
+
+
+def recibir_puerto_serie():
+    # Recepcion de datos por puerto serie
+    print ("Wait Input Data")
+
+    time.sleep(2)
+    # out = ord(ser.read(1))
+
+    # print(ser.inWaiting())
+    # if out != '':
+        # print (">>" + str(out))
+    out = [0,0,0,0]
+    i = 0
+    while ser.inWaiting() > 0:
+        # out += ser.read(1).decode()
+        out[i] = ord(ser.read(1))
+        i += 1
+    
+    
+    
+        # trama_rx = bytearray(1) 
+        # if ser.inWaiting() > 0:
+        #     trama_rx = ser.read(1)
+            
+        # trama_rx = ord(trama_rx)
+    print(f'i:{i}')
+
+    x = (out[0]&0xFF)<<24 | (out[1]&0xFF)<<16 | (out[2]&0xFF)<<8 | (out[3]&0xFF)
+    print (">>" + str(x))
+    return x
+        
+
 ser = serial.Serial(
     port='/dev/ttyUSB5',  #Configurar con el puerto
     baudrate=115200,
@@ -16,180 +67,131 @@ ser = serial.Serial(
 ser.isOpen()
 ser.timeout=None
 print(ser.timeout)
+# splitData = ['','','','']
+mem_full = 0
 
-sendData = 0x00000000
-splitData = ['','','','']
+archivo_bram = open('bram.txt', 'w')
 
-print("Comandos:")
-print("\t RESET - Resetea los valores del sistema")
-print("\t EN_TX - Habilita la PRBS y el filtro transmisor")
-print("\t EN_RX")
-print("\t PH_SEL [0-3]")
-print("\t RUN_MEM")
-print("\t READ_MEM")
-print("\t BER_S_I")
-print("\t BER_S_Q")
-print("\t BER_E_I")
-print("\t BER_E_Q")
-print("\t BER_H")
-print("\t IS_MEM_FULL")
-print("\t read")
-print("\t <num comando> <data value>")
-print("\t exit")
-print(COMANDOS)
-    
+ber_s_i = 0x0000000000000000 # 64 bits
+ber_s_q = 0x0000000000000000 # 64 bits
+ber_e_i = 0x0000000000000000 # 64 bits
+ber_e_q = 0x0000000000000000 # 64 bits
+
 while 1 :
-    print('''Comandos:
-           RESET       - Resetea los valores del sistema.
-           EN_TX       - Habilita la PRBS y el filtro transmisor.
-           EN_RX       - Habilita la BER.
-           PH_SEL[0-3] - Selecciona la fase para el down sampling.
-           RUN_MEM     - Comienza a guardar los datos del filtro Tx en memoria.
-           READ_MEM    - Lee la memoria por completo.
-           ADDR_MEM    - Lee un dato de una dirección específica de memoria.
-           BER_S_I     - Lee los 32 bits menos significativos de la cantidad de muestras de la BER en el canal I.
-           BER_S_Q     - Lee los 32 bits menos significativos de la cantidad de muestras de la BER en el canal Q.
-           BER_E_I     - Lee los 32 bits menos significativos de la cantidad de errores de la BER en el canal I.
-           BER_E_Q     - Lee los 32 bits menos significativos de la cantidad de errores de la BER en el canal Q.
-           BER_H       - Lee los 32 bits mas significativos de la cantidad leida anteriormente.
-           IS_MEM_FULL - Verifica si la memoria está llena.''')
-    inputData = input('''Ingrese el comando que quiere enviar. O escriba "exit" para salir.\r\n<<''')
-    if inputData == 'exit':
+    sendData = 0x00000000 # sendData = {frame_command,frame_enable,frame_data}
+    frame_command = 0x00  # sendData[31:24]
+                          # sendData[23]. Es siempre 0, el uBlaze lo pone en 1.
+    frame_data = 0x000000 # sendData[22:0]
+    mem_full   = 0
+    
+    inputData = input('''Ingrese el comando que quiere enviar. O escriba "exit" para salir.
+          comandos:
+            RESET [0-1] - Resetea los valores del sistema.
+            EN_TX [0-1] - Habilita la PRBS y el filtro transmisor.
+            EN_RX [0-1] - Habilita la BER.
+            PH_SEL[0-3] - Selecciona la fase para el down sampling.
+            RUN_MEM     - Comienza a guardar los datos del filtro Tx en memoria.
+            READ_MEM    - Lee la memoria por completo.
+            ADDR_MEM    - Lee un dato de una dirección específica de memoria.
+            BER_S_I     - Lee los 32 LSB de la cantidad de muestras de la BER en el canal I.
+            BER_S_Q     - Lee los 32 LSB de la cantidad de muestras de la BER en el canal Q.
+            BER_E_I     - Lee los 32 LSB de la cantidad de errores de la BER en el canal I.
+            BER_E_Q     - Lee los 32 LSB de la cantidad de errores de la BER en el canal Q.
+            BER_H       - Lee los 32 MSB de la cantidad leida anteriormente.
+            IS_MEM_FULL - Verifica si la memoria esta llena.
+          
+          <comando> <valor del dato>
+          cmd<<''')
+    inputData = inputData.split(' ')
+    command_str = inputData[0]
+    if(len(inputData) > 0): frame_data = int(inputData[1])
+    if command_str == 'exit':
         ser.close()
         exit()
-    elif inputData == 'RESET':
-    elif inputData == 'EN_TX':
-    elif inputData == 'EN_RX':
-    elif inputData == 'PH_SEL[0-3]':
-    elif inputData == 'PH_SEL[0-3]':
-    elif inputData == 'PH_SEL[0-3]':
-    elif inputData == 'PH_SEL[0-3]':
-    elif inputData == 'RUN_MEM':
-    elif inputData == 'RESET':
-    elif inputData == 'RESET':
-    elif inputData == 'RESET':
-    elif inputData == 'RESET':
-    elif inputData == 'RESET':
-        if inputData == '0':
-            print("Para el LED 0:")
-            inputData = input("Desea encender algun color del LED 0? y/n:\r\n<<")
-            if inputData == 'y':
-                sendData &= 0x00000FF8 
-                inputData = input("Desea encender el LED rojo? y/n:\r\n<<")
-                if inputData == 'y':
-                    sendData |= 0x00000004
-                inputData = input("Desea encender el LED verde? y/n:\r\n<<")
-                if inputData == 'y':
-                    sendData |= 0x00000002
-                inputData = input("Desea encender el LED azul? y/n:\r\n<<")
-                if inputData == 'y':
-                    sendData |= 0x00000001
-            elif inputData == 'n':
-                inputData = input("Desea apagar el LED 0? y/n:\r\n<<")
-                if inputData == 'y':
-                    sendData &= 0x00000FF8   
-        elif inputData == '1':
-            print("Para el LED 1:")
-            inputData = input("Desea encender algun color del LED 1? y/n:\r\n<<")
-            if inputData == 'y':
-                sendData &= 0x00000FC7 
-                inputData = input("Desea encender el LED rojo? y/n:\r\n<<")
-                if inputData == 'y':
-                    sendData |= 0x00000020
-                inputData = input("Desea encender el LED verde? y/n:\r\n<<")
-                if inputData == 'y':
-                    sendData |= 0x00000010
-                inputData = input("Desea encender el LED azul? y/n:\r\n<<")
-                if inputData == 'y':
-                    sendData |= 0x00000008
-            elif inputData == 'n':
-                inputData = input("Desea apagar el LED 1? y/n:\r\n<<")
-                if inputData == 'y':
-                    sendData &= 0x00000FC7  
-        elif inputData == '2':
-            print("Para el LED 2:")
-            inputData = input("Desea encender algun color del LED 2? y/n:\r\n<<")
-            if inputData == 'y':
-                sendData &= 0x00000E3F
-                inputData = input("Desea encender el LED rojo? y/n:\r\n<<")
-                if inputData == 'y':
-                    sendData |= 0x00000100
-                inputData = input("Desea encender el LED verde? y/n:\r\n<<")
-                if inputData == 'y':
-                    sendData |= 0x00000080
-                inputData = input("Desea encender el LED azul? y/n:\r\n<<")
-                if inputData == 'y':
-                    sendData |= 0x00000040
-            elif inputData == 'n':
-                inputData = input("Desea apagar el LED 2? y/n:\r\n<<")
-                if inputData == 'y':
-                    sendData &= 0x00000E3F  
-        elif inputData == '3':
-            print("Para el LED 3:")
-            inputData = input("Desea encender algun color del LED 3? y/n:\r\n<<")
-            if inputData == 'y':
-                sendData &= 0x000001FF 
-                inputData = input("Desea encender el LED rojo? y/n:\r\n<<")
-                if inputData == 'y':
-                    sendData |= 0x00000800
-                inputData = input("Desea encender el LED verde? y/n:\r\n<<")
-                if inputData == 'y':
-                    sendData |= 0x00000400
-                inputData = input("Desea encender el LED azul? y/n:\r\n<<")
-                if inputData == 'y':
-                    sendData |= 0x00000200
-            elif inputData == 'n':
-                inputData = input("Desea apagar el LED 3? y/n:\r\n<<")
-                if inputData == 'y':
-                    sendData &= 0x000001FF 
+    elif command_str == 'RESET':
+        if(frame_data == 0 or frame_data == 1):
+            frame_command = 0x00
+        else:
+            print('El valor del RESET debe ser 0 o 1')
+            continue
 
+    elif command_str == 'EN_TX':
+        frame_command = 0x01
         
-        splitData[0] = (sendData&0xFF).to_bytes(1, byteorder = "big")
-        splitData[1] = ((sendData>>8)&0xFF).to_bytes(1, byteorder = "big")
-        splitData[2] = ((sendData>>16)&0xFF).to_bytes(1, byteorder = "big")
-        splitData[3] = ((sendData>>24)&0xFF).to_bytes(1, byteorder = "big")
+    elif command_str == 'EN_RX':
+        frame_command = 0x02
 
-        # print(splitData[0])
-        # print(splitData[1])
-        # print(splitData[2])
-        # print(splitData[3])
-        ser.write(splitData[0])
-        ser.write(splitData[1])
-        ser.write(splitData[2])
-        ser.write(splitData[3])
-        time.sleep(1)
-        # print(hex(sendData))
+    elif command_str == 'PH_SEL':
+        if(0 <= frame_data <= 3):
+            frame_command = 0x03
+        else:
+            print('La fase esta fuera del rango seleccionable')
+            continue
 
-    elif inputData == '4':
-        print ("Wait Input Data")
-        aux = sendData
-        sendData |= 0x0A0A0000
-        # sendData = 0x0A0A0000
-        splitData[0] = (sendData&0xFF).to_bytes(1, byteorder = "big")
-        splitData[1] = ((sendData>>8)&0xFF).to_bytes(1, byteorder = "big")
-        splitData[2] = ((sendData>>16)&0xFF).to_bytes(1, byteorder = "big")
-        splitData[3] = ((sendData>>24)&0xFF).to_bytes(1, byteorder = "big")
+    elif command_str == 'RUN_MEM':
+        frame_command = 0x04
 
-        # print(splitData[0])
-        # print(splitData[1])
-        # print(splitData[2])
-        # print(splitData[3])
-        ser.write(splitData[0])
-        ser.write(splitData[1])
-        ser.write(splitData[2])
-        ser.write(splitData[3])
+    elif command_str == 'READ_MEM':
+        if mem_full == 1:
+            frame_command = 0x05
+            for addr in range(2**15):
+                sendData = (frame_command << 24) | addr
+                enviar_puerto_serie(sendData)
+                value_mem = recibir_puerto_serie()  # Recibo 32 bits del RF
+                # archivo_bram.write(str(addr) + ' ' + str(value_mem) + '\n')
+                archivo_bram.write(str(value_mem) + '\n')
+            continue
+        else:
+            print('La memoria no esta llena')
+            continue
 
-        time.sleep(2)
-        out = ord(ser.read(1))
+    elif command_str == 'ADDR_MEM':
+        if(0 <= frame_data < 2**15):
+            frame_command = 0x05
+        else:
+            print('La direccion de memoria esta fuera del rango seleccionable')
+            continue
 
+    elif command_str == 'BER_S_I':
+        # Recibo parte baja de la palabra
+        frame_command = 0x06
+        sendData = (frame_command << 24) | frame_data
+        ber_s_i = recibir_puerto_serie()&0xFFFFFFFF
+        # Recibo parte alta de la palabra
+        frame_command = 0x0A    # BER_H
+        sendData = (frame_command << 24) | frame_data
+        enviar_puerto_serie(sendData)
+        ber_s_i |= (recibir_puerto_serie()&0xFFFFFFFF) << 32
 
+    elif command_str == 'BER_S_Q':
+        frame_command = 0x07 
+        ber_s_q = recibir_puerto_serie()
 
-        print(ser.inWaiting())
-        if out != '':
-            print (">>" + str(out))
+    elif command_str == 'BER_E_I':
+        frame_command = 0x08
+        ber_e_i = recibir_puerto_serie()
 
-        sendData = aux
+    elif command_str == 'BER_E_Q':
+        frame_command = 0x09
+        ber_e_q = recibir_puerto_serie()
 
+    elif command_str == 'BER_H':
+        frame_command = 0x0A
 
+    elif command_str == 'IS_MEM_FULL':
+        frame_command = 0x0B
+        sendData = (frame_command << 24) | frame_data
+        enviar_puerto_serie(sendData)
+        mem_full = recibir_puerto_serie()
+        continue
     else:
-        print("Comando no valido.")
+        print("commando no valido.")
+        continue
+
+    
+    sendData = (frame_command << 24) | frame_data
+    enviar_puerto_serie(sendData)
+    recibir_puerto_serie()
+
+archivo_bram.close()
+    

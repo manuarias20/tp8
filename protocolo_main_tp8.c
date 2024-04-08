@@ -78,7 +78,10 @@ int main()
 
 		while(XUartLite_IsSending(&uart_module)){}
 		
-		XUartLite_Send(&uart_module, &(datos_tx),1);
+		XUartLite_Send(&uart_module, &(datos_tx[0]),1);
+		XUartLite_Send(&uart_module, &(datos_tx[1]),1);
+		XUartLite_Send(&uart_module, &(datos_tx[2]),1);
+		XUartLite_Send(&uart_module, &(datos_tx[3]),1);
 
 	//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	// ACA es donde se escribe toda la funcionalidad
