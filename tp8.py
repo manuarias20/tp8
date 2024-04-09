@@ -42,13 +42,6 @@ def recibir_puerto_serie():
         out[i] = ord(ser.read(1))
         i += 1
     
-    
-    
-        # trama_rx = bytearray(1) 
-        # if ser.inWaiting() > 0:
-        #     trama_rx = ser.read(1)
-            
-        # trama_rx = ord(trama_rx)
     print(f'i:{i}')
 
     x = (out[0]&0xFF)<<24 | (out[1]&0xFF)<<16 | (out[2]&0xFF)<<8 | (out[3]&0xFF)
@@ -57,7 +50,7 @@ def recibir_puerto_serie():
         
 
 ser = serial.Serial(
-    port='/dev/ttyUSB5',  #Configurar con el puerto
+    port='/dev/ttyUSB1',  #Configurar con el puerto
     baudrate=115200,
     parity=serial.PARITY_NONE,
     stopbits=serial.STOPBITS_ONE,
@@ -165,18 +158,37 @@ while 1 :
 
     elif command_str == 'BER_S_Q':
         frame_command = 0x07 
-        ber_s_q = recibir_puerto_serie()
+        # Recibo parte baja de la palabra
+        sendData = (frame_command << 24) | frame_data
+        ber_s_q = recibir_puerto_serie()&0xFFFFFFFF
+        # Recibo parte alta de la palabra
+        frame_command = 0x0A    # BER_H
+        sendData = (frame_command << 24) | frame_data
+        enviar_puerto_serie(sendData)
+        ber_s_q |= (recibir_puerto_serie()&0xFFFFFFFF) << 32
 
     elif command_str == 'BER_E_I':
+        # Recibo parte baja de la palabra
         frame_command = 0x08
-        ber_e_i = recibir_puerto_serie()
+        sendData = (frame_command << 24) | frame_data
+        ber_e_i = recibir_puerto_serie()&0xFFFFFFFF
+        # Recibo parte alta de la palabra
+        frame_command = 0x0A    # BER_H
+        sendData = (frame_command << 24) | frame_data
+        enviar_puerto_serie(sendData)
+        ber_e_i |= (recibir_puerto_serie()&0xFFFFFFFF) << 32
+        
 
     elif command_str == 'BER_E_Q':
+        # Recibo parte baja de la palabra
         frame_command = 0x09
-        ber_e_q = recibir_puerto_serie()
-
-    elif command_str == 'BER_H':
-        frame_command = 0x0A
+        sendData = (frame_command << 24) | frame_data
+        ber_e_q = recibir_puerto_serie()&0xFFFFFFFF
+        # Recibo parte alta de la palabra
+        frame_command = 0x0A    # BER_H
+        sendData = (frame_command << 24) | frame_data
+        enviar_puerto_serie(sendData)
+        ber_e_q |= (recibir_puerto_serie()&0xFFFFFFFF) << 32
 
     elif command_str == 'IS_MEM_FULL':
         frame_command = 0x0B

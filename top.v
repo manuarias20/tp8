@@ -153,7 +153,7 @@ module top #(
      .o_ber_error_I(ber_error_I),
      .o_ber_error_Q(ber_error_Q),
      .i_sw(dsp_sw)              ,  //! i_sw[0]->EnbTx. i_sw[1]->EnbRx. i_sw[3:2]->Phase selector.
-     .i_rstn(rst_RF_to_DSP)     ,  //! Reset (active low)
+     .i_rstn(~rst_RF_to_DSP)     ,  //! Reset (active low)
      .clk(clk100)                  //! Clock
     );
 
