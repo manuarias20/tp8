@@ -60,6 +60,14 @@ module top #(
    wire          [2*BRAM_DATA_WIDTH-1 : 0]           data_log_from_mem;       
    wire            [BRAM_ADDR_WIDTH-1 : 0]           addr_log_to_mem;       
    wire            [BRAM_DATA_WIDTH-1 : 0]           filter_data;       
+
+   /////////////////////////////////////////////////////////////////////////////////////
+   // For run_log & read_log
+   /////////////////////////////////////////////////////////////////////////////////////
+   reg                                              run_flag;       
+   reg                                              read_flag;       
+   reg                           [31 : 0]           run_counter;       
+   reg                           [31 : 0]           read_counter;       
    
 
 
@@ -167,16 +175,58 @@ module top #(
    // Leds
    ///////////////////////////////////////////
    assign o_led[0] = lock_clk;
-   assign o_led[1] = reset;
+   assign o_led[1] = rst_RF_to_DSP;
    assign o_led[2] = EnbTx;
    assign o_led[3] = EnbRx;
 
    assign o_led_RGB0[0] = mem_full;
-   assign o_led_RGB0[1] = read_log;
-   assign o_led_RGB0[2] = run_log;
+   assign o_led_RGB0[1] = read_flag; //read_log
+   assign o_led_RGB0[2] = run_flag;  //run_log
 
    assign o_led_RGB1[0] = phase_sel[0];
    assign o_led_RGB1[1] = phase_sel[1];
    assign o_led_RGB1[2] = 1'b0;
+
+   ///////// MANU SE LA COME
+
+  
+
+  always @(posedge clk100) begin
+    if (~i_resetn) begin
+      run_flag    <= 0;
+      run_counter <= 0;
+    end
+    else if(run_log) begin
+      run_flag    <= 1;
+      run_counter <= 0;
+    end
+    else if(run_flag) begin
+        run_counter <= (run_counter == 32'd100_000_000) ? 0 : run_counter + 1;  // contador de 1 seg
+        run_flag    <= (run_counter == 32'd100_000_000) ? 0 : 1; 
+    end
+    else begin
+      run_flag    <= run_flag;
+      run_counter <= run_counter;
+    end
+  end
+
+  always @(posedge clk100) begin
+    if (~i_resetn) begin
+      read_flag    <= 0;
+      read_counter <= 0;
+    end
+    else if(read_log) begin
+      read_flag    <= 1;
+      read_counter <= 0;
+    end
+    else if(read_flag) begin
+        read_counter <= (read_counter == 32'd100_000_000) ? 0 : read_counter + 1;  // contador de 1 seg
+        read_flag    <= (read_counter == 32'd100_000_000) ? 0 : 1;  // contador de 1 seg 
+    end
+    else begin
+      read_flag    <= read_flag;
+      read_counter <= read_counter;
+    end
+  end
 
 endmodule // top
