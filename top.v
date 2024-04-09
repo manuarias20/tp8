@@ -114,7 +114,7 @@ module top #(
    ///////////////////////////////////////////
    registerFile
     u_registerFile 
-      (.o_gpi(gpi0)                          ,
+      (.o_gpi(gpi0)                           ,
        .o_rst(rst_RF_to_DSP)                  ,
        .o_enbTx(EnbTx)                        ,
        .o_enbRx(EnbRx)                        ,
@@ -122,7 +122,7 @@ module top #(
        .o_run_log(run_log)                    ,
        .o_read_log(read_log)                  ,
        .o_addr_log_to_mem(addr_log_to_mem)    ,
-       .i_gpo(gpo0)                          ,
+       .i_gpo(gpo0)                           ,
        .i_data_log_from_mem(data_log_from_mem),
        .i_mem_full(mem_full)                  ,
        .i_ber_samp_I(ber_samp_I)              ,   
