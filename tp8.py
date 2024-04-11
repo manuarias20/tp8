@@ -22,30 +22,31 @@ def enviar_puerto_serie(data_to_send):
     ser.write(splitData[1])
     ser.write(splitData[2])
     ser.write(splitData[3])
-    time.sleep(1)
+    # time.sleep(1)
 
 
 def recibir_puerto_serie():
     # Recepcion de datos por puerto serie
-    print ("Wait Input Data")
+    print ("Esperando dato del puerto serie...")
 
-    time.sleep(2)
-    # out = ord(ser.read(1))
-
-    # print(ser.inWaiting())
-    # if out != '':
-        # print (">>" + str(out))
     out = [0,0,0,0]
     i = 0
+    timeout = 1000000
+    while ser.inWaiting() == 0:
+        i += 1
+        if i == timeout:
+            break
+
     while ser.inWaiting() > 0:
         # out += ser.read(1).decode()
         out[i] = ord(ser.read(1))
         i += 1
     
-    print(f'i:{i}')
+    # print(f'i:{i}')
 
-    x = (out[0]&0xFF)<<24 | (out[1]&0xFF)<<16 | (out[2]&0xFF)<<8 | (out[3]&0xFF)
-    print (">>" + str(x))
+    x = (out[3]&0xFF)<<24 | (out[2]&0xFF)<<16 | (out[1]&0xFF)<<8 | (out[0]&0xFF)
+    # print (f"Dato recibido en hex:{hex(x)}")
+    print (f">>{x} ({hex(x)})")
     return x
         
 
@@ -75,7 +76,6 @@ while 1 :
     frame_command = 0x00  # sendData[31:24]
                           # sendData[23]. Es siempre 0, el uBlaze lo pone en 1.
     frame_data = 0x000000 # sendData[22:0]
-    mem_full   = 0
     
     inputData = input('''Ingrese el comando que quiere enviar. O escriba "exit" para salir.
           comandos:
@@ -86,18 +86,20 @@ while 1 :
             RUN_MEM     - Comienza a guardar los datos del filtro Tx en memoria.
             READ_MEM    - Lee la memoria por completo.
             ADDR_MEM    - Lee un dato de una dirección específica de memoria.
-            BER_S_I     - Lee los 32 LSB de la cantidad de muestras de la BER en el canal I.
-            BER_S_Q     - Lee los 32 LSB de la cantidad de muestras de la BER en el canal Q.
-            BER_E_I     - Lee los 32 LSB de la cantidad de errores de la BER en el canal I.
-            BER_E_Q     - Lee los 32 LSB de la cantidad de errores de la BER en el canal Q.
-            BER_H       - Lee los 32 MSB de la cantidad leida anteriormente.
+            BER_S_I     - Lee la cantidad de muestras de la BER en el canal I.
+            BER_S_Q     - Lee la cantidad de muestras de la BER en el canal Q.
+            BER_E_I     - Lee la cantidad de errores de la BER en el canal I.
+            BER_E_Q     - Lee la cantidad de errores de la BER en el canal Q.
             IS_MEM_FULL - Verifica si la memoria esta llena.
           
           <comando> <valor del dato>
+          valor del dato por defecto : 0.
           cmd<<''')
+    inputData = inputData.upper()
     inputData = inputData.split(' ')
+    print(inputData)
     command_str = inputData[0]
-    if(len(inputData) > 0): frame_data = int(inputData[1])
+    if len(inputData) > 1: frame_data = int(inputData[1])
     if command_str == 'exit':
         ser.close()
         exit()
@@ -147,33 +149,33 @@ while 1 :
 
     elif command_str == 'BER_S_I':
         # Recibo parte baja de la palabra
-        frame_command = 0x06
+        frame_command = 0x07
         sendData = (frame_command << 24) | frame_data
         ber_s_i = recibir_puerto_serie()&0xFFFFFFFF
         # Recibo parte alta de la palabra
-        frame_command = 0x0A    # BER_H
+        frame_command = 0x0B    # BER_H
         sendData = (frame_command << 24) | frame_data
         enviar_puerto_serie(sendData)
         ber_s_i |= (recibir_puerto_serie()&0xFFFFFFFF) << 32
 
     elif command_str == 'BER_S_Q':
-        frame_command = 0x07 
+        frame_command = 0x08 
         # Recibo parte baja de la palabra
         sendData = (frame_command << 24) | frame_data
         ber_s_q = recibir_puerto_serie()&0xFFFFFFFF
         # Recibo parte alta de la palabra
-        frame_command = 0x0A    # BER_H
+        frame_command = 0x0B    # BER_H
         sendData = (frame_command << 24) | frame_data
         enviar_puerto_serie(sendData)
         ber_s_q |= (recibir_puerto_serie()&0xFFFFFFFF) << 32
 
     elif command_str == 'BER_E_I':
         # Recibo parte baja de la palabra
-        frame_command = 0x08
+        frame_command = 0x09
         sendData = (frame_command << 24) | frame_data
         ber_e_i = recibir_puerto_serie()&0xFFFFFFFF
         # Recibo parte alta de la palabra
-        frame_command = 0x0A    # BER_H
+        frame_command = 0x0B    # BER_H
         sendData = (frame_command << 24) | frame_data
         enviar_puerto_serie(sendData)
         ber_e_i |= (recibir_puerto_serie()&0xFFFFFFFF) << 32
@@ -181,21 +183,23 @@ while 1 :
 
     elif command_str == 'BER_E_Q':
         # Recibo parte baja de la palabra
-        frame_command = 0x09
+        frame_command = 0x0A
         sendData = (frame_command << 24) | frame_data
         ber_e_q = recibir_puerto_serie()&0xFFFFFFFF
         # Recibo parte alta de la palabra
-        frame_command = 0x0A    # BER_H
+        frame_command = 0x0B    # BER_H
         sendData = (frame_command << 24) | frame_data
         enviar_puerto_serie(sendData)
         ber_e_q |= (recibir_puerto_serie()&0xFFFFFFFF) << 32
 
     elif command_str == 'IS_MEM_FULL':
-        frame_command = 0x0B
+        frame_command = 0x0C
         sendData = (frame_command << 24) | frame_data
         enviar_puerto_serie(sendData)
         mem_full = recibir_puerto_serie()
         continue
+    elif command_str == 'EXIT': 
+        break
     else:
         print("commando no valido.")
         continue

@@ -46,7 +46,7 @@ module top #(
    /////////////////////////////////////////////////////////////////////////////////////
    // For DSP
    /////////////////////////////////////////////////////////////////////////////////////
-   wire                                              rst_RF_to_DSP;   
+   wire                                              RF_o_rst;   
    wire                            [3 : 0]           dsp_sw;           // dsp_sw[3:0]->dsp.i_sw[3:0]
    wire                            [3 : 0]           dsp_o_led;        // dsp.o_led[3:0]->dsp_o_led[3:0]->vio
    wire                           [63 : 0]           ber_samp_I;       
@@ -115,7 +115,7 @@ module top #(
    registerFile
     u_registerFile 
       (.o_gpi(gpi0)                           ,
-       .o_rst(rst_RF_to_DSP)                  ,
+       .o_rst(RF_o_rst)                       ,
        .o_enbTx(EnbTx)                        ,
        .o_enbRx(EnbRx)                        ,
        .o_phase_sel(phase_sel)                ,
@@ -155,13 +155,13 @@ module top #(
     u_dsp 
     (
      .o_filter_data(filter_data),  //! Tx Filter outputs. I ([15:8]) & Q ([7:0]).
-     .o_led(dsp_o_led)          ,  //! i_rstn->o_led[0]. EnbTx->o_led[1]. EnbRx->o_led[2]. BER=0->o_led[3].
+     .o_led(dsp_o_led)          ,  //! ~i_rstn->o_led[0]. EnbTx->o_led[1]. EnbRx->o_led[2]. BER=0->o_led[3].
      .o_ber_samp_I(ber_samp_I)  ,
      .o_ber_samp_Q(ber_samp_Q)  ,
      .o_ber_error_I(ber_error_I),
      .o_ber_error_Q(ber_error_Q),
      .i_sw(dsp_sw)              ,  //! i_sw[0]->EnbTx. i_sw[1]->EnbRx. i_sw[3:2]->Phase selector.
-     .i_rstn(~rst_RF_to_DSP)     ,  //! Reset (active low)
+     .i_rstn(~RF_o_rst)    ,  //! Reset (active low)
      .clk(clk100)                  //! Clock
     );
 
@@ -170,12 +170,11 @@ module top #(
     assign dsp_sw[2] = phase_sel[0];
     assign dsp_sw[3] = phase_sel[1];
 
-
    ///////////////////////////////////////////
    // Leds
    ///////////////////////////////////////////
    assign o_led[0] = lock_clk;
-   assign o_led[1] = rst_RF_to_DSP;
+   assign o_led[1] = RF_o_rst;
    assign o_led[2] = EnbTx;
    assign o_led[3] = EnbRx;
 
@@ -187,9 +186,8 @@ module top #(
    assign o_led_RGB1[1] = phase_sel[1];
    assign o_led_RGB1[2] = 1'b0;
 
-   ///////// MANU SE LA COME
 
-  
+  // RUN & READ flags  
 
   always @(posedge clk100) begin
     if (~i_resetn) begin
