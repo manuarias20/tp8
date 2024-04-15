@@ -37,10 +37,12 @@ def recibir_puerto_serie():
         if i == timeout:
             break
 
+    i = 0
     while ser.inWaiting() > 0:
         # out += ser.read(1).decode()
         out[i] = ord(ser.read(1))
         i += 1
+        # print(i)
     
     # print(f'i:{i}')
 
@@ -151,46 +153,58 @@ while 1 :
         # Recibo parte baja de la palabra
         frame_command = 0x07
         sendData = (frame_command << 24) | frame_data
+        enviar_puerto_serie(sendData)
         ber_s_i = recibir_puerto_serie()&0xFFFFFFFF
         # Recibo parte alta de la palabra
         frame_command = 0x0B    # BER_H
         sendData = (frame_command << 24) | frame_data
         enviar_puerto_serie(sendData)
         ber_s_i |= (recibir_puerto_serie()&0xFFFFFFFF) << 32
+        print(f"BER_S_I={ber_s_i}")
+        continue
 
     elif command_str == 'BER_S_Q':
         frame_command = 0x08 
         # Recibo parte baja de la palabra
         sendData = (frame_command << 24) | frame_data
+        enviar_puerto_serie(sendData)
         ber_s_q = recibir_puerto_serie()&0xFFFFFFFF
         # Recibo parte alta de la palabra
         frame_command = 0x0B    # BER_H
         sendData = (frame_command << 24) | frame_data
         enviar_puerto_serie(sendData)
         ber_s_q |= (recibir_puerto_serie()&0xFFFFFFFF) << 32
+        print(f"BER_S_Q={ber_s_q}")
+        continue
 
     elif command_str == 'BER_E_I':
         # Recibo parte baja de la palabra
         frame_command = 0x09
         sendData = (frame_command << 24) | frame_data
+        enviar_puerto_serie(sendData)
         ber_e_i = recibir_puerto_serie()&0xFFFFFFFF
         # Recibo parte alta de la palabra
         frame_command = 0x0B    # BER_H
         sendData = (frame_command << 24) | frame_data
         enviar_puerto_serie(sendData)
         ber_e_i |= (recibir_puerto_serie()&0xFFFFFFFF) << 32
+        print(f"BER_E_I={ber_e_i}")
+        continue
         
 
     elif command_str == 'BER_E_Q':
         # Recibo parte baja de la palabra
         frame_command = 0x0A
         sendData = (frame_command << 24) | frame_data
+        enviar_puerto_serie(sendData)
         ber_e_q = recibir_puerto_serie()&0xFFFFFFFF
         # Recibo parte alta de la palabra
         frame_command = 0x0B    # BER_H
         sendData = (frame_command << 24) | frame_data
         enviar_puerto_serie(sendData)
         ber_e_q |= (recibir_puerto_serie()&0xFFFFFFFF) << 32
+        print(f"BER_E_Q={ber_e_q}")
+        continue
 
     elif command_str == 'IS_MEM_FULL':
         frame_command = 0x0C
