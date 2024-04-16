@@ -72,6 +72,9 @@ u_top
         #20     i_gpo     = {RESET, 1'b1, 23'b1}; //comando de reset
         #10     i_gpo[23] = 1'b0;   //toggle enable
         $display("%1t:      %x        %x      RESET",$time, i_gpo, o_gpi);
+        #20     i_gpo     = {RESET, 1'b1, 23'b0}; //comando de reset
+        #10     i_gpo[23] = 1'b0;   //toggle enable
+        $display("%1t:      %x        %x      RESET",$time, i_gpo, o_gpi);
         #20     i_gpo     = {EN_TX, 1'b1, 23'b1}; // Enable Tx
         #10     i_gpo[23] = 1'b0;
         $display("%1t:      %x        %x      EN_TX",$time, i_gpo, o_gpi);
@@ -131,7 +134,25 @@ u_top
         #20     i_gpo     = {READ_MEM, 1'b1, 23'b010101101111001}; // 
         #20     i_gpo[23] = 1'b0;
         $display("%1t:      %x        %x      READ_MEM",$time, i_gpo, o_gpi);
-        #100;
+        
+        #2147483647;
+        #2147483647;
+        #100000;
+        
+
+        #20     i_gpo     = {BER_S_I, 1'b1, 23'b0}; // 
+        #10     i_gpo[23] = 1'b0;   
+        $display("%1t:      %x        %x      BER_S_I",$time, i_gpo, o_gpi);
+        #20     i_gpo     = {BER_S_Q, 1'b1, 23'b0}; // 
+        #10     i_gpo[23] = 1'b0;   
+        $display("%1t:      %x        %x      BER_S_Q",$time, i_gpo, o_gpi);
+        #20     i_gpo     = {BER_E_I, 1'b1, 23'b0}; // 
+        #10     i_gpo[23] = 1'b0;   
+        $display("%1t:      %x        %x      BER_E_I",$time, i_gpo, o_gpi);
+        #20     i_gpo     = {BER_E_Q, 1'b1, 23'b0}; // 
+        #10     i_gpo[23] = 1'b0;   
+        $display("%1t:      %x        %x      BER_E_Q",$time, i_gpo, o_gpi);
+
         
 
         $display("Simulation Finished");

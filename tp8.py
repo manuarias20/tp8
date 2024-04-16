@@ -44,6 +44,7 @@ def recibir_puerto_serie():
         i += 1
         # print(i)
     
+    time.sleep(2)
     # print(f'i:{i}')
 
     x = (out[3]&0xFF)<<24 | (out[2]&0xFF)<<16 | (out[1]&0xFF)<<8 | (out[0]&0xFF)

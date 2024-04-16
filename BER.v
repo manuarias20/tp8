@@ -39,7 +39,7 @@ module BER
   localparam NB_PHASES   = $clog2(N_PHASES);
   localparam NB_SAMPLES  = $clog2(N_SAMPLES);
   localparam NB_POS      = $clog2(N_POS);
-  localparam MAX_SAMPLES = 2 ** NB_BER_CNT - 1;
+  // localparam MAX_SAMPLES = 2 ** NB_BER_CNT - 1;
 
   //! Internal Signals
   reg    [NB_INPUT-1:0]            phase       ; //! Phase selected
@@ -172,7 +172,7 @@ module BER
     end
     else if(state == COUNT_MODE) begin
       if (i_en && i_valid) begin
-        if (samp_cnt < (MAX_SAMPLES-1))
+        if (samp_cnt < (64'hFFFF_FFFF_FFFF_FFFF)) // samp_cnt < MAX_SAMPLES = 2 ** 64 - 1
           samp_cnt <= samp_cnt + 1'b1;
       end
     end
@@ -216,7 +216,7 @@ module BER
     end
     else if(state == COUNT_MODE) begin
       if (i_en && i_valid) begin
-        if (err_cnt < (MAX_SAMPLES-1))
+        if (err_cnt < (64'hFFFF_FFFF_FFFF_FFFF)) // samp_cnt < MAX_SAMPLES = 2 ** 64 - 1
           err_cnt <= err_cnt + (dly_register[pos_cnt] ^ slice_value);
       end
     end
@@ -285,7 +285,7 @@ module BER
       end
       COUNT_MODE:
       begin
-        if ((!i_en) || ((pos_cnt == MAX_SAMPLES-1) && (samp_cnt == MAX_SAMPLES-1) && i_en && i_valid))
+        if ((!i_en) || ((pos_cnt == 64'hFFFF_FFFF_FFFF_FFFE) && (samp_cnt == 64'hFFFF_FFFF_FFFF_FFFE) && i_en && i_valid)) // MAX_SAMPLES-1 = 64'hFFFF_FFFF_FFFF_FFFE
           next_state = STOP_MODE;
         else
           next_state = state;
