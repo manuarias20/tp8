@@ -54,6 +54,8 @@ module registerFile
     reg             [1:0] BER_cnt;
     reg           [127:0] BER_buffer;
 
+    reg             [1:0] cont_read_log;
+
     wire            [7:0] gpo_command;
     wire                  gpo_enable;
     wire           [22:0] gpo_data;
@@ -82,6 +84,7 @@ module registerFile
             read_log        <= 1'b0;
             addr_log_to_mem <= {NB_ADDR_MEM{1'b0}};
             prev_enable     <= 1'b0;
+            cont_read_log   <= 2'b00;
         end else begin
             if((gpo_enable == 1'b1) && (prev_enable == 1'b0)) begin
                 case(gpo_command)
@@ -96,7 +99,7 @@ module registerFile
                     READ_MEM:   begin
                         if( i_mem_full ) begin
                             read_log        <= 1'b1;
-                            // run_log         <= 1'b0;
+                            cont_read_log   <= 2'b10;
                             addr_log_to_mem <= gpo_data[NB_ADDR_MEM-1:0];
                         end 
                     end
@@ -135,9 +138,14 @@ module registerFile
                     // default:
                 endcase
             end
-            else if(read_log) begin
-                gpi      <= i_data_log_from_mem;
-                read_log <= 0;
+            else if(cont_read_log > 0) begin
+                if (cont_read_log == 2'b10) begin
+                    read_log <= 0;
+                end
+                else if (cont_read_log == 2'b01) begin
+                    gpi      <= i_data_log_from_mem;
+                end
+                cont_read_log <= cont_read_log - 1'b1;
             end
             else if(run_log) begin
                 run_log <= 0;

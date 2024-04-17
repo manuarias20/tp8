@@ -8,10 +8,10 @@ module top #(
    output wire  [NB_LEDS - 1 : 0] o_led      , //! lock_clk -> o_led[0]. o_rst -> o_led[1]. o_enb[0] -> o_led[2]. o_enb[1] -> o_led[3].
    output             [3 - 1 : 0] o_led_RGB0 ,
    output             [3 - 1 : 0] o_led_RGB1 ,
-  //  output wire                    out_tx_uart,
-   output wire [NB_GPIOS - 1 : 0] o_gpi      ,
-   input  wire [NB_GPIOS - 1 : 0] i_gpo      ,
-  //  input  wire                    in_rx_uart ,
+   output wire                    out_tx_uart,
+  //  output wire [NB_GPIOS - 1 : 0] o_gpi      ,
+  //  input  wire [NB_GPIOS - 1 : 0] i_gpo      ,
+   input  wire                    in_rx_uart ,
    input  wire                    i_resetn   ,
    input                          clk100
    );
@@ -22,8 +22,8 @@ module top #(
    wire [NB_GPIOS                 - 1 : 0]           gpo0;
    wire [NB_GPIOS                 - 1 : 0]           gpi0;
    
-   assign gpo0 = i_gpo;
-   assign o_gpi = gpi0;
+  //  assign gpo0 = i_gpo;
+  //  assign o_gpi = gpi0;
 
 
    wire                                              clockdsp;
@@ -80,7 +80,7 @@ module top #(
    // MicroBlaze
    ///////////////////////////////////////////
    //design_1
-   /*MicroGPIO
+   MicroGPIO
      u_micro
        (.clock100         (clockdsp    ),  // Clock aplicacion
         .gpio_rtl_tri_o   (gpo0        ),  // GPIO
@@ -91,14 +91,14 @@ module top #(
         .usb_uart_rxd     (in_rx_uart  ),  // UART
         .usb_uart_txd     (out_tx_uart )   // UART
         );
-   */
-   assign reset = ~i_resetn; // Comentar en caso de incluir el VIO
-  //  assign reset = (fromHard) ? ~i_resetn : i_reset_from_vio; // Descomentar en caso de incluir el VIO
+   
+  //  assign reset = ~i_resetn; // Comentar en caso de incluir el VIO
+   assign reset = (fromHard) ? ~i_resetn : i_reset_from_vio; // Descomentar en caso de incluir el VIO
 
    ///////////////////////////////////////////
    // Descomentar en caso de incluir el VIO
    
-   /*vio
+   vio
    u_vio
    (.clk_0                     (clockdsp),
     .probe_in0_o_led           ({o_led[3], o_led[2] ,o_led[1] ,o_led[0]}),
@@ -108,7 +108,7 @@ module top #(
     .probe_out0_fromHard       (fromHard),
     .probe_out1_reset_from_vio (i_reset_from_vio)
     );
-    */
+    
    ///////////////////////////////////////////
    // Register File
    ///////////////////////////////////////////
