@@ -98,14 +98,7 @@ assign o_data_log_from_mem = {bram_data_out_b, bram_data_out_a};
             end
             FULL:
             begin
-                if ( i_read_log ) 
-                    next_state = READ;
-                else
-                    next_state = state;
-            end
-            READ:
-            begin
-                if (i_run_log) 
+                if ( i_run_log ) 
                     next_state = RUN;
                 else
                     next_state = state;
@@ -135,12 +128,6 @@ assign o_data_log_from_mem = {bram_data_out_b, bram_data_out_a};
             bram_rw  = 0;
         end 
         FULL: 
-        begin
-            addr_mem = addr_count;
-            mem_full = 1;
-            bram_rw  = 1;
-        end 
-        READ: 
         begin
             addr_mem = i_addr_log_to_mem;
             mem_full = 1;
@@ -177,10 +164,16 @@ assign o_data_log_from_mem = {bram_data_out_b, bram_data_out_a};
                     end
                 end
             end
-            else if (state == READ) begin
+            else if (state == FULL) begin
                 addr_count <= {BRAM_ADDR_WIDTH{1'b0}};
-                bram_cs_a <= 1'b0;
-                bram_cs_b <= 1'b0;
+                if (i_run_log) begin
+                    bram_cs_a <= 1'b0;
+                    bram_cs_b <= 1'b1;
+                end
+                else begin
+                    bram_cs_a <= 1'b0;
+                    bram_cs_b <= 1'b0;
+                end
             end
             else begin
                 addr_count <= {BRAM_ADDR_WIDTH{1'b0}};
